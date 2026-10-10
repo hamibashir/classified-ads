@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;      /* #F8FAFC Slate 50 */
+    --foreground: 222 47% 11%;      /* #0F172A Slate 900 */
+    --card: 0 0% 100%;             /* #FFFFFF */
+    --card-foreground: 222 47% 11%; /* #0F172A */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 173 78% 26%;         /* #0F766E Teal 700 */
+    --primary-foreground: 0 0% 100%;/* #FFFFFF */
+    --secondary: 210 40% 96%;       /* #F1F5F9 Slate 100 */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;           /* #F1F5F9 Slate 100 */
+    --muted-foreground: 215 16% 47%;/* #64748B Slate 500 */
+    --accent: 210 40% 96%;          /* #F1F5F9 */
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;       /* #DC2626 Red 600 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;          /* #E2E8F0 Slate 200 */
+    --input: 214 32% 91%;           /* #E2E8F0 Slate 200 */
+    --ring: 173 78% 26%;            /* #0F766E Teal 700 */
+    --price: 160 84% 24%;           /* #047857 Emerald 700 */
+    --price-foreground: 0 0% 100%;
+    --whatsapp: 142 70% 49%;        /* #25D366 Brand Green */
+    --whatsapp-foreground: 0 0% 100%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 220 34% 7%;       /* #0B0F17 Deep Slate */
+    --foreground: 210 40% 96%;      /* #F1F5F9 Slate 100 */
+    --card: 218 37% 12%;            /* #131B2A */
+    --card-foreground: 210 40% 96%; /* #F1F5F9 */
+    --popover: 218 37% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 173 80% 40%;         /* #14B8A6 Teal 500 */
+    --primary-foreground: 173 84% 10%; /* #042F2E */
+    --secondary: 217 33% 17%;       /* #1E293B Slate 800 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;           /* #1E293B Slate 800 */
+    --muted-foreground: 215 20% 65%;/* #94A3B8 Slate 400 */
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;       /* #EF4444 Red 500 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 17%;          /* #1E293B Slate 800 */
+    --input: 217 33% 17%;           /* #1E293B Slate 800 */
+    --ring: 173 80% 40%;            /* #14B8A6 Teal 500 */
+    --price: 160 84% 39%;           /* #10B981 Emerald 500 */
+    --price-foreground: 0 0% 100%;
+    --whatsapp: 142 70% 49%;
+    --whatsapp-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
