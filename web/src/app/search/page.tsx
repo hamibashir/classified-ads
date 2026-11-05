@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 // Rich Pakistani classified ads dataset for search filtering
-const SEARCH_FALLBACK_ADS: AdListItem[] = [
+const SEARCH_FALLBACK_ADS: (AdListItem & { subcatSlug?: string })[] = [
   {
     id: 's-1',
     title: 'Toyota Corolla Altis Grande 1.8 CVT-i 2022',
@@ -50,6 +50,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
+    subcatSlug: 'cars',
   },
   {
     id: 's-2',
@@ -77,6 +78,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
+    subcatSlug: 'cars',
   },
   {
     id: 's-3',
@@ -104,6 +106,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-mobiles', name: 'Smartphones', slug: 'mobiles-tablets' },
+    subcatSlug: 'smartphones',
   },
   {
     id: 's-4',
@@ -131,6 +134,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-mobiles', name: 'Smartphones', slug: 'mobiles-tablets' },
+    subcatSlug: 'smartphones',
   },
   {
     id: 's-5',
@@ -158,6 +162,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-elec', name: 'Laptops', slug: 'electronics-appliances' },
+    subcatSlug: 'computers-laptops',
   },
   {
     id: 's-6',
@@ -185,6 +190,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-prop', name: 'Houses', slug: 'property' },
+    subcatSlug: 'houses-for-sale',
   },
   {
     id: 's-7',
@@ -212,6 +218,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-bikes', name: 'Motorcycles', slug: 'motorcycles' },
+    subcatSlug: 'motorcycles',
   },
   {
     id: 's-8',
@@ -239,6 +246,7 @@ const SEARCH_FALLBACK_ADS: AdListItem[] = [
       },
     ],
     category: { id: 'cat-services', name: 'Services', slug: 'services' },
+    subcatSlug: 'services',
   },
 ];
 
@@ -347,12 +355,21 @@ function SearchContainer() {
       }
 
       if (subcat) {
-        filtered = filtered.filter(
-          (ad) =>
-            ad.category?.slug === subcat ||
-            ad.slug.includes(subcat) ||
-            ad.title.toLowerCase().includes(subcat.toLowerCase())
-        );
+        filtered = filtered.filter((ad) => {
+          const s = subcat.toLowerCase();
+          const adSub = (ad.subcatSlug || '').toLowerCase();
+          return (
+            adSub === s ||
+            ad.category?.slug === s ||
+            ad.slug.toLowerCase().includes(s) ||
+            ad.title.toLowerCase().includes(s) ||
+            (s === 'cars' && (ad.category?.slug === 'motors-vehicles' || /corolla|civic|alto|car/i.test(ad.title))) ||
+            (s === 'motorcycles' && (ad.category?.slug === 'motorcycles' || /ybr|bike/i.test(ad.title))) ||
+            (s === 'smartphones' && (ad.category?.slug === 'mobiles-tablets' || /iphone|samsung|ultra/i.test(ad.title))) ||
+            (s === 'computers-laptops' && (ad.category?.slug === 'electronics-appliances' || /macbook|laptop|xps/i.test(ad.title))) ||
+            (s === 'houses-for-sale' && (ad.category?.slug === 'property' || /house|villa|marla/i.test(ad.title)))
+          );
+        });
       }
 
       if (city) {
@@ -474,19 +491,17 @@ function SearchContainer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8 items-start">
           {/* Left Desktop Sidebar */}
-          <div className="hidden lg:block lg:col-span-1 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs sticky top-24">
+          <div className="hidden lg:block lg:col-span-1 bg-card p-4 sm:p-5 rounded-2xl border border-border/80 sticky top-24">
             <FilterSidebar
               selectedCategory={category}
               selectedSubcategory={subcat}
               selectedCity={city}
-              radius={radius}
               minPrice={minPrice}
               maxPrice={maxPrice}
               condition={condition}
               onCategoryChange={(cat) => updateUrlParams({ category: cat, subcat: null })}
               onSubcategoryChange={(s) => updateUrlParams({ subcat: s || null })}
-              onCityChange={(c) => updateUrlParams({ city: c, radius: null })}
-              onRadiusChange={(r) => updateUrlParams({ radius: r || null })}
+              onCityChange={(c) => updateUrlParams({ city: c })}
               onPriceChange={(min, max) =>
                 updateUrlParams({ minPrice: min || null, maxPrice: max || null })
               }
@@ -510,14 +525,12 @@ function SearchContainer() {
                   selectedCategory={category}
                   selectedSubcategory={subcat}
                   selectedCity={city}
-                  radius={radius}
                   minPrice={minPrice}
                   maxPrice={maxPrice}
                   condition={condition}
                   onCategoryChange={(cat) => updateUrlParams({ category: cat, subcat: null })}
                   onSubcategoryChange={(s) => updateUrlParams({ subcat: s || null })}
-                  onCityChange={(c) => updateUrlParams({ city: c, radius: null })}
-                  onRadiusChange={(r) => updateUrlParams({ radius: r || null })}
+                  onCityChange={(c) => updateUrlParams({ city: c })}
                   onPriceChange={(min, max) =>
                     updateUrlParams({ minPrice: min || null, maxPrice: max || null })
                   }

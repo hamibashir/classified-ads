@@ -2,47 +2,68 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { PlusCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, ShieldCheck, Zap, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const PostAdBanner: React.FC = () => {
   return (
-    <section className="my-10 rounded-2xl bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white p-6 sm:p-10 shadow-md">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-3 max-w-xl text-center md:text-left">
-          <span className="inline-block px-3 py-1 rounded-full bg-teal-500/20 text-teal-200 text-xs font-semibold uppercase tracking-wider">
-            Sell Faster Across Pakistan
-          </span>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
-            Have something to sell? Post your ad for free in 60 seconds!
+    <section className="my-8 sm:my-12 rounded-2xl bg-[#081B15] border border-[#14392D] text-white p-6 sm:p-10 relative overflow-hidden transition-colors">
+      {/* Subtle Architectural Dot Grid Pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px',
+        }}
+      />
+
+      <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8">
+        {/* Left Column: Editorial Copy */}
+        <div className="space-y-3 max-w-2xl text-left">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[11px] font-semibold tracking-wider text-emerald-300 uppercase">
+            Direct Peer-to-Peer Marketplace
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+            Sell directly to verified buyers across Pakistan
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300">
-            Reach thousands of active buyers in Karachi, Lahore, Islamabad, and all 13 major Pakistani cities.
+
+          <p className="text-xs sm:text-sm text-zinc-300/85 leading-relaxed font-normal">
+            List your vehicle, device, property, or service in minutes. Enjoy instant local reach without middleman commissions.
           </p>
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-teal-100 pt-1">
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Zero commission fees
+
+          {/* Minimal Value Props */}
+          <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-300/90 pt-1">
+            <span className="flex items-center gap-1.5 font-medium">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Zero Commission Fees</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Direct WhatsApp leads
+            <span className="flex items-center gap-1.5 font-medium">
+              <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Instant Buyer Inquiries</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Up to 8 photo uploads
+            <span className="flex items-center gap-1.5 font-medium">
+              <ImageIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Up to 8 High-Res Photos</span>
             </span>
           </div>
         </div>
 
-        <div className="shrink-0">
-          <Link href="/post-ad">
+        {/* Right Column: Grounded Minimal CTA */}
+        <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-2.5">
+          <Link href="/post-ad" className="w-full sm:w-auto">
             <Button
-              size="lg"
-              className="bg-white hover:bg-slate-100 text-teal-950 font-bold px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 gap-2 text-base active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto h-12 px-7 bg-white hover:bg-zinc-100 text-zinc-950 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
-              <PlusCircle className="w-5 h-5 text-teal-700" />
-              <span>Post Your Free Ad Now</span>
-              <ArrowRight className="w-4 h-4 text-teal-700" />
+              <Plus className="w-4 h-4 text-zinc-950" />
+              <span>Post a Listing</span>
+              <ArrowRight className="w-4 h-4 text-zinc-950" />
             </Button>
           </Link>
+
+          <span className="text-[11px] text-zinc-400 font-medium">
+            Takes under 2 minutes • 100% Free
+          </span>
         </div>
       </div>
     </section>

@@ -6,9 +6,8 @@ import {
   MapPin,
   Crosshair,
   ArrowRight,
-  Compass,
-  AlertCircle,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { calculateDistanceKm } from '@/lib/geo-utils';
@@ -17,10 +16,6 @@ import { AdCard } from '@/components/ads/AdCard';
 import { AdCardSkeleton } from '@/components/ads/AdCardSkeleton';
 import { AdListItem } from '@/types/ad';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
-const RADIUS_OPTIONS = [5, 10, 25, 50] as const;
-type RadiusOption = (typeof RADIUS_OPTIONS)[number];
 
 // Realistic Pakistani classified listings for fallback preview
 const FALLBACK_NEARBY_ADS: AdListItem[] = [
@@ -197,10 +192,8 @@ export const NearbyAdsSection: React.FC = () => {
     requestCurrentLocation,
   } = useGeolocation();
 
-  const [radiusKm, setRadiusKm] = useState<RadiusOption>(25);
   const [ads, setAds] = useState<AdListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
 
   // Active geographic anchor (GPS coordinates if available, otherwise city center)
   const activeAnchor = useMemo(() => {
@@ -218,7 +211,6 @@ export const NearbyAdsSection: React.FC = () => {
         params: {
           lat: activeAnchor.latitude,
           lng: activeAnchor.longitude,
-          radius: radiusKm,
           limit: 8,
           sort: 'nearest',
         },
@@ -231,7 +223,6 @@ export const NearbyAdsSection: React.FC = () => {
         : (response as { ads?: AdListItem[] }).ads || [];
 
       if (items.length > 0) {
-        // Compute distanceKm client-side for precision
         const enriched = items.map((item) => {
           if (item.latitude && item.longitude) {
             const dist = calculateDistanceKm(activeAnchor, {
@@ -243,13 +234,11 @@ export const NearbyAdsSection: React.FC = () => {
           return item;
         });
         setAds(enriched);
-        setIsUsingFallback(false);
       } else {
         throw new Error('Empty backend list');
       }
     } catch {
-      // Graceful fallback: Filter fallback items within selected radius of activeAnchor
-      setIsUsingFallback(true);
+      // Graceful fallback with distance enrichment
       const enrichedFallback = FALLBACK_NEARBY_ADS.map((item) => {
         const dist = calculateDistanceKm(activeAnchor, {
           latitude: item.latitude!,
@@ -259,76 +248,56 @@ export const NearbyAdsSection: React.FC = () => {
           ...item,
           distanceKm: Math.round(dist * 10) / 10,
         };
-      })
-        .filter((item) => item.distanceKm !== undefined && item.distanceKm <= radiusKm)
-        .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+      }).sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
 
       setAds(enrichedFallback);
     } finally {
       setLoading(false);
     }
-  }, [activeAnchor, radiusKm]);
+  }, [activeAnchor]);
 
   useEffect(() => {
     fetchNearbyAds();
   }, [fetchNearbyAds]);
 
   return (
-    <section className="w-full py-6 md:py-8 border-t border-slate-100">
-      {/* Header with Location & Radius Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="p-1 rounded-md bg-teal-50 text-teal-700">
-              <Compass className="w-4 h-4" />
+    <section className="w-full py-6 sm:py-8 border-t border-border/60">
+      {/* Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 sm:mb-6 gap-3 pb-3 border-b border-border/60">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold tracking-wider text-emerald-800 dark:text-emerald-400 uppercase">
+              Proximity Deals
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Nearby Ads in <span className="text-teal-700">{selectedCity.name}</span>
-            </h2>
             {isGpsActive && (
-              <Badge variant="success" className="text-[10px] px-1.5 py-0">
-                GPS Exact
-              </Badge>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-600/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                GPS Accurate
+              </span>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Discover verified classified ads within {radiusKm} km of your location
+
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+            Nearby in <span className="text-emerald-800 dark:text-emerald-400">{selectedCity.name}</span>
+          </h2>
+
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
+            Locally listed items and verified vehicles closest to your location
           </p>
         </div>
 
-        {/* Radius Filter Pills & GPS Action */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex items-center bg-slate-100/90 p-1 rounded-lg border border-slate-200">
-            <span className="text-[11px] font-semibold text-slate-500 px-2 flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-slate-400" />
-              Radius:
-            </span>
-            {RADIUS_OPTIONS.map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRadiusKm(r)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
-                  radiusKm === r
-                    ? 'bg-teal-700 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                }`}
-              >
-                {r} km
-              </button>
-            ))}
-          </div>
-
+        {/* Action Controls */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
           {!isGpsActive && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => requestCurrentLocation()}
               disabled={isGeoLoading}
-              className="gap-1.5 text-xs text-teal-700 border-teal-300 hover:bg-teal-50 h-8"
+              className="gap-1.5 text-xs h-8 px-3 rounded-lg border-border/80 hover:bg-secondary text-foreground"
             >
               <Crosshair className={`w-3.5 h-3.5 ${isGeoLoading ? 'animate-spin' : ''}`} />
-              <span>{isGeoLoading ? 'Detecting...' : 'Use Precise GPS'}</span>
+              <span>{isGeoLoading ? 'Locating...' : 'Use Precise GPS'}</span>
             </Button>
           )}
 
@@ -337,66 +306,48 @@ export const NearbyAdsSection: React.FC = () => {
             size="sm"
             onClick={() => fetchNearbyAds()}
             disabled={loading}
-            className="h-8 px-2 text-slate-500 hover:text-slate-800"
-            title="Refresh nearby ads"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-lg"
+            title="Refresh listings"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
+
+          <Link
+            href={`/search?city=${encodeURIComponent(selectedCity.id)}`}
+            className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors group ml-1"
+          >
+            <span>All in {selectedCity.name}</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
 
-      {/* Notice when using fallback calculation */}
-      {isUsingFallback && (
-        <div className="mb-4 px-3 py-1.5 rounded-lg bg-teal-50/70 border border-teal-100 flex items-center justify-between text-xs text-teal-800">
-          <span className="flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-teal-600" />
-            Showing ads sorted by Great-Circle Haversine distance from {selectedCity.name} center.
-          </span>
-          <span className="text-[11px] font-medium text-teal-600">Proximity Verified</span>
-        </div>
-      )}
-
-      {/* Grid State */}
+      {/* Listings Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
           {Array.from({ length: 4 }).map((_, idx) => (
             <AdCardSkeleton key={idx} />
           ))}
         </div>
       ) : ads.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
           {ads.map((ad) => (
             <AdCard key={ad.id} ad={ad} />
           ))}
         </div>
       ) : (
-        /* Empty State */
-        <div className="p-8 sm:p-12 text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-3">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1">
-            No ads found within {radiusKm} km
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mb-5">
-            Try expanding your search radius to 50 km or browse ads across {selectedCity.name}.
+        <div className="p-8 sm:p-12 text-center rounded-xl border border-border/60 bg-secondary/30">
+          <p className="text-sm font-medium text-foreground mb-1">
+            No nearby listings found in {selectedCity.name}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setRadiusKm(50)}
-              className="text-xs"
-            >
-              Expand Radius to 50 km
+          <p className="text-xs text-muted-foreground mb-4">
+            Browse all available listings across Pakistan or publish your own ad.
+          </p>
+          <Link href="/search">
+            <Button variant="default" size="sm" className="bg-[#0D382B] text-white text-xs">
+              Browse All Listings
             </Button>
-            <Link href={`/search?city=${encodeURIComponent(selectedCity.id)}`}>
-              <Button variant="outline" size="sm" className="text-xs gap-1.5">
-                <span>Browse All {selectedCity.name} Ads</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
-          </div>
+          </Link>
         </div>
       )}
     </section>

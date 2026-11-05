@@ -9,7 +9,6 @@ import { MediaGallery } from '@/components/ads/MediaGallery';
 import { AdOverview } from '@/components/ads/AdOverview';
 import { SellerSidebar } from '@/components/ads/SellerSidebar';
 import { ReportAdModal } from '@/components/ads/ReportAdModal';
-import { InspectionChecklist } from '@/components/ads/InspectionChecklist';
 import { SimilarAdsSection } from '@/components/ads/SimilarAdsSection';
 import { AdListItem } from '@/types/ad';
 import { Button } from '@/components/ui/button';
@@ -269,9 +268,6 @@ export default function AdDetailsPage({ params }: AdDetailsPageProps) {
 
               {/* Task 8.7: Ad Overview, Pricing, Specs & Description */}
               <AdOverview ad={ad} />
-
-              {/* Category-Specific Buyer Inspection & Fraud Protection Checklist */}
-              <InspectionChecklist category={ad.category} />
             </div>
 
             {/* Sidebar Column (Col-Span-1): Seller Overview & Contact CTAs (Task 8.8) */}

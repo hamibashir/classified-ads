@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, Tag, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Tag, ChevronDown, ShieldCheck, Zap, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -44,100 +44,137 @@ export const HomeHero: React.FC = () => {
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-teal-950/95 to-slate-900 text-white p-6 sm:p-10 md:p-12 shadow-xl border border-teal-800/30 mb-8 transition-all">
-        {/* Subtle Ambient Radial Glows */}
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#081B15] border border-[#14392D] text-white p-6 sm:p-10 md:p-14 mb-8 sm:mb-12 shadow-2xl transition-all">
+        {/* Subtle Architectural Grid Lines */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
 
-        <div className="relative max-w-3xl mx-auto text-center space-y-5">
-          {/* Minimal Interactive Location Pill */}
-          <button
-            type="button"
-            onClick={() => setIsCityModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/15 text-xs font-medium text-teal-200 transition-all hover:border-teal-400/50 cursor-pointer"
-            title="Click to change city"
-          >
-            <MapPin className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-            <span>{selectedCity.name}, {selectedCity.province}</span>
-            <span className="text-[10px] text-teal-300 font-semibold underline underline-offset-2 ml-1">
-              Change
+        {/* Ambient Warm Vignette (Restrained & Architectural) */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-emerald-500/10 blur-[100px] pointer-events-none rounded-full" />
+
+        <div className="relative max-w-4xl mx-auto text-center space-y-6">
+          {/* Top Status & Location Badges */}
+          <div className="inline-flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs font-medium text-emerald-300/90 tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Verified Marketplace • Pakistan
             </span>
-          </button>
 
-          {/* Main Clean Heading */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-            Find Everything You Need in{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-teal-200 to-emerald-400">
-              {selectedCity.name}
-            </span>
-          </h1>
+            <button
+              type="button"
+              onClick={() => setIsCityModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-xs font-medium text-white transition-all cursor-pointer group"
+              title="Click to change your location"
+            >
+              <MapPin className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>{selectedCity.name}, {selectedCity.province}</span>
+              <span className="text-[11px] text-emerald-300 font-semibold underline underline-offset-2 ml-0.5">
+                Change
+              </span>
+            </button>
+          </div>
 
-          {/* Minimal, Crisp Subtitle */}
-          <p className="text-xs sm:text-sm md:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Explore verified cars, smartphones, real estate, and daily services across Pakistan.
-          </p>
+          {/* Editorial Display Heading */}
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.15]">
+              The curated marketplace for{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-teal-100 to-white">
+                {selectedCity.name}
+              </span>
+            </h1>
 
-          {/* Modern Elevated Search Bar */}
+            <p className="text-sm sm:text-base text-zinc-300/90 max-w-2xl mx-auto leading-relaxed font-normal">
+              Direct peer-to-peer buying and selling for verified vehicles, electronics, properties, and services. Zero intermediary clutter.
+            </p>
+          </div>
+
+          {/* Unified Architectural Search Dock */}
           <form
             onSubmit={handleSearch}
-            className="bg-white rounded-2xl p-2 sm:p-2.5 shadow-2xl shadow-teal-950/40 flex flex-col md:flex-row items-stretch gap-2 text-slate-800 border border-slate-100"
+            className="bg-white dark:bg-zinc-950 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-2xl flex flex-col md:flex-row items-stretch gap-1.5 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all focus-within:border-emerald-600/60"
           >
             {/* Search Input */}
-            <div className="relative flex-1 flex items-center">
-              <Search className="absolute left-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+            <div className="relative flex-1 flex items-center min-w-0">
+              <Search className="absolute left-3.5 h-4.5 w-4.5 text-zinc-400 pointer-events-none" />
               <Input
                 type="search"
                 placeholder={`Search cars, mobiles, property in ${selectedCity.name}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11 h-12 text-sm sm:text-base border-0 focus-visible:ring-0 shadow-none bg-transparent placeholder:text-slate-400"
+                className="pl-11 h-12 text-sm sm:text-base border-0 focus-visible:ring-0 shadow-none bg-transparent placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 font-medium"
               />
             </div>
 
-            {/* Category Dropdown with Clean Styling */}
-            <div className="md:w-48 border-t md:border-t-0 md:border-l border-slate-200 pl-0 md:pl-2 flex items-center relative">
+            {/* Category Filter Dropdown */}
+            <div className="md:w-52 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 pl-0 md:pl-2 flex items-center relative">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 aria-label="Filter by category"
-                className="w-full h-11 text-xs sm:text-sm text-slate-700 bg-transparent border-0 focus:outline-none cursor-pointer px-2 pr-7 appearance-none font-medium"
+                className="w-full h-11 text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 bg-transparent border-0 focus:outline-none cursor-pointer px-3 pr-8 appearance-none font-medium truncate"
               >
-                <option value="">All Categories</option>
+                <option value="" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+                  All Categories
+                </option>
                 {POPULAR_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.slug}>
+                  <option
+                    key={c.id}
+                    value={c.slug}
+                    className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                  >
                     {c.name}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 pointer-events-none" />
             </div>
 
-            {/* Search Action Button */}
+            {/* High-Contrast Search Action Button */}
             <Button
               type="submit"
-              size="lg"
-              className="h-12 px-6 sm:px-8 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="h-12 px-7 bg-[#0D382B] hover:bg-[#07241B] dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-zinc-950 text-white font-semibold rounded-lg sm:rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shrink-0"
             >
               <Search className="w-4 h-4" />
               <span>Search</span>
             </Button>
           </form>
 
-          {/* Minimal Inline Trending Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs">
-            <span className="text-slate-400 font-medium flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5 text-teal-400" /> Popular:
+          {/* Minimal Inline Trending Queries */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-1 text-xs">
+            <span className="text-zinc-400 font-medium flex items-center gap-1">
+              <Tag className="w-3.5 h-3.5 text-emerald-400" /> Popular:
             </span>
             {TRENDING_SEARCHES.map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => handleTrendingClick(tag)}
-                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-all border border-white/10 text-xs font-medium cursor-pointer active:scale-95"
+                className="px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition-all border border-white/10 text-xs font-medium cursor-pointer active:scale-95"
               >
                 {tag}
               </button>
             ))}
+          </div>
+
+          {/* Micro Trust Indicators Bar */}
+          <div className="pt-4 border-t border-white/[0.08] grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+            <div className="flex items-center gap-2 text-zinc-300/80 text-xs font-medium justify-center sm:justify-start">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Phone Verified Sellers</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-300/80 text-xs font-medium justify-center">
+              <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Direct WhatsApp & Chat</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-300/80 text-xs font-medium justify-center sm:justify-end">
+              <Navigation className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>GPS Proximity Ordering</span>
+            </div>
           </div>
         </div>
       </section>

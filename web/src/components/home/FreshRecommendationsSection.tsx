@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
-  Sparkles,
   ArrowRight,
   RefreshCw,
   Globe,
@@ -16,7 +15,6 @@ import { AdCard } from '@/components/ads/AdCard';
 import { AdCardSkeleton } from '@/components/ads/AdCardSkeleton';
 import { AdListItem } from '@/types/ad';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 // Quick category filter options
 const QUICK_CATEGORY_FILTERS = [
@@ -47,7 +45,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 420,
-    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30m ago
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-1',
@@ -74,7 +72,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 680,
-    createdAt: new Date(Date.now() - 65 * 60 * 1000).toISOString(), // 1h ago
+    createdAt: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-2',
@@ -101,7 +99,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 310,
-    createdAt: new Date(Date.now() - 110 * 60 * 1000).toISOString(), // 2h ago
+    createdAt: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-3',
@@ -128,7 +126,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 1450,
-    createdAt: new Date(Date.now() - 150 * 60 * 1000).toISOString(), // 2.5h ago
+    createdAt: new Date(Date.now() - 150 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-4',
@@ -155,7 +153,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 290,
-    createdAt: new Date(Date.now() - 210 * 60 * 1000).toISOString(), // 3.5h ago
+    createdAt: new Date(Date.now() - 210 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-5',
@@ -182,7 +180,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 160,
-    createdAt: new Date(Date.now() - 300 * 60 * 1000).toISOString(), // 5h ago
+    createdAt: new Date(Date.now() - 300 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-6',
@@ -209,7 +207,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 220,
-    createdAt: new Date(Date.now() - 360 * 60 * 1000).toISOString(), // 6h ago
+    createdAt: new Date(Date.now() - 360 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-7',
@@ -236,7 +234,7 @@ const FALLBACK_FRESH_ADS: AdListItem[] = [
     showPhone: true,
     allowWhatsapp: true,
     viewsCount: 540,
-    createdAt: new Date(Date.now() - 480 * 60 * 1000).toISOString(), // 8h ago
+    createdAt: new Date(Date.now() - 480 * 60 * 1000).toISOString(),
     images: [
       {
         id: 'img-fr-8',
@@ -293,7 +291,6 @@ export const FreshRecommendationsSection: React.FC = () => {
       let filtered = [...FALLBACK_FRESH_ADS];
 
       if (scope === 'city') {
-        // Prefer current city; if none match, show nationwide fallback
         const cityMatches = filtered.filter(
           (ad) => ad.locationCity.toLowerCase() === selectedCity.name.toLowerCase()
         );
@@ -310,7 +307,6 @@ export const FreshRecommendationsSection: React.FC = () => {
         );
       }
 
-      // Sort newest first
       filtered.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -332,53 +328,50 @@ export const FreshRecommendationsSection: React.FC = () => {
   const hasMore = ads.length > displayCount;
 
   return (
-    <section className="w-full py-8 md:py-10 border-t border-slate-100">
-      {/* Header and Scope Selector */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="p-1 rounded-md bg-emerald-50 text-emerald-700">
-              <Sparkles className="w-4 h-4" />
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Fresh Recommendations
-            </h2>
-            <Badge variant="price" className="text-[10px] px-1.5 py-0 font-semibold">
-              Live Feed
-            </Badge>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500">
+    <section className="w-full py-6 sm:py-8 border-t border-border/60">
+      {/* Editorial Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-5 sm:mb-6 pb-3 border-b border-border/60">
+        <div className="space-y-1">
+          <span className="text-[11px] font-semibold tracking-wider text-emerald-800 dark:text-emerald-400 uppercase">
+            Marketplace Feed
+          </span>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+            Fresh Recommendations
+          </h2>
+
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
             {scope === 'city'
               ? `Newest verified classified listings in ${selectedCity.name}`
               : 'Newest verified listings across all major Pakistani cities'}
           </p>
         </div>
 
-        {/* City vs Nationwide Scope Pills */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
+        {/* Scope Segmented Control & Refresh */}
+        <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+          <div className="flex items-center bg-secondary/80 p-1 rounded-lg border border-border/60 text-xs font-medium">
             <button
               type="button"
               onClick={() => setScope('city')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors cursor-pointer ${
                 scope === 'city'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5" />
+              <Building2 className="w-3.5 h-3.5 text-zinc-400" />
               <span>{selectedCity.name}</span>
             </button>
             <button
               type="button"
               onClick={() => setScope('nationwide')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors cursor-pointer ${
                 scope === 'nationwide'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Globe className="w-3.5 h-3.5" />
+              <Globe className="w-3.5 h-3.5 text-zinc-400" />
               <span>All Pakistan</span>
             </button>
           </div>
@@ -388,7 +381,7 @@ export const FreshRecommendationsSection: React.FC = () => {
             size="sm"
             onClick={() => fetchFreshAds()}
             disabled={loading}
-            className="h-8 px-2 text-slate-500 hover:text-slate-800"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-lg"
             title="Refresh feed"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -396,7 +389,7 @@ export const FreshRecommendationsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Category Filter Pills */}
+      {/* Minimal Category Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-6 no-scrollbar">
         {QUICK_CATEGORY_FILTERS.map((cat) => (
           <button
@@ -406,10 +399,10 @@ export const FreshRecommendationsSection: React.FC = () => {
               setSelectedCategory(cat.slug);
               setDisplayCount(8);
             }}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all border ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer border ${
               selectedCategory === cat.slug
-                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-zinc-900 dark:border-zinc-100 font-semibold'
+                : 'bg-card text-muted-foreground border-border/70 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-foreground'
             }`}
           >
             {cat.label}
@@ -419,67 +412,64 @@ export const FreshRecommendationsSection: React.FC = () => {
 
       {/* 4-Column Responsive Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
           {Array.from({ length: 8 }).map((_, idx) => (
             <AdCardSkeleton key={idx} />
           ))}
         </div>
       ) : displayedAds.length > 0 ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {displayedAds.map((ad) => (
               <AdCard key={ad.id} ad={ad} />
             ))}
           </div>
 
           {/* Load More & Search CTA Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-border/40">
             {hasMore ? (
               <Button
                 variant="outline"
                 onClick={() => setDisplayCount((prev) => prev + 4)}
-                className="w-full sm:w-auto px-6 font-semibold text-slate-700"
+                className="w-full sm:w-auto px-6 text-xs font-semibold border-border/80 hover:border-zinc-400 dark:hover:border-zinc-600 rounded-xl"
               >
-                Load More Ads
+                Load More Listings
               </Button>
             ) : null}
 
             <Link href="/search" className="w-full sm:w-auto">
               <Button
-                variant="primary"
-                className="w-full sm:w-auto px-6 gap-2 font-semibold"
+                className="w-full sm:w-auto px-6 h-10 gap-2 text-xs font-semibold bg-[#0D382B] hover:bg-[#07241B] dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 rounded-xl transition-colors"
               >
                 <span>Explore All Categories</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </div>
         </div>
       ) : (
         /* Empty State */
-        <div className="p-10 text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-3">
-            <PackageOpen className="w-6 h-6" />
+        <div className="p-8 sm:p-12 text-center rounded-xl border border-border/60 bg-secondary/30">
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mx-auto text-muted-foreground mb-3">
+            <PackageOpen className="w-5 h-5 text-zinc-400" />
           </div>
-          <h3 className="text-base font-bold text-slate-800 mb-1">
+          <h3 className="text-sm font-semibold text-foreground mb-1">
             No fresh ads found in this category
           </h3>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mb-4">
-            Try switching to &quot;All Pakistan&quot; or browse another category to see new listings.
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
+            Try switching to &quot;All Pakistan&quot; or select another category to view active listings.
           </p>
-          <div className="flex justify-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedCategory('all');
-                setScope('nationwide');
-              }}
-              className="text-xs"
-            >
-              Reset Filters
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedCategory('all');
+              setScope('nationwide');
+            }}
+            className="text-xs rounded-lg"
+          >
+            Reset Filters
+          </Button>
         </div>
       )}
     </section>

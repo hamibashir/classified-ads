@@ -4,31 +4,26 @@ import React from 'react';
 
 export const AdCardSkeleton: React.FC = () => {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col h-full animate-pulse">
-      {/* 4:3 Image Skeleton */}
-      <div className="relative aspect-4/3 w-full bg-slate-200">
-        <div className="absolute top-2.5 left-2.5 w-16 h-5 rounded-full bg-slate-300" />
-        <div className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-300" />
+    <div className="rounded-xl border border-border/80 bg-card overflow-hidden flex flex-col h-full animate-pulse">
+      {/* 16:10 Image Skeleton */}
+      <div className="relative aspect-[16/10] w-full bg-muted/60">
+        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-muted" />
       </div>
 
       {/* Content Skeleton */}
-      <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
-        <div className="space-y-2">
+      <div className="p-3 flex flex-col flex-1 justify-between gap-2.5">
+        <div className="space-y-1.5">
           {/* Price Bar */}
-          <div className="h-6 w-28 sm:w-36 bg-slate-200 rounded" />
+          <div className="h-5 w-24 sm:w-28 bg-muted rounded" />
           {/* Title Lines */}
-          <div className="h-4 w-full bg-slate-200 rounded" />
-          <div className="h-4 w-3/4 bg-slate-200 rounded" />
+          <div className="h-3.5 w-full bg-muted rounded" />
+          <div className="h-3.5 w-2/3 bg-muted rounded" />
         </div>
 
-        {/* Location & Time */}
-        <div className="pt-2 border-t border-slate-100 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="h-3.5 w-24 bg-slate-200 rounded" />
-            <div className="h-3.5 w-16 bg-slate-200 rounded" />
-          </div>
-          {/* Action Button */}
-          <div className="h-8 w-full bg-slate-100 rounded-lg" />
+        {/* Location & Time Bottom Row */}
+        <div className="pt-2 border-t border-border/40 flex items-center justify-between">
+          <div className="h-2.5 w-20 bg-muted rounded" />
+          <div className="h-2.5 w-12 bg-muted rounded" />
         </div>
       </div>
     </div>

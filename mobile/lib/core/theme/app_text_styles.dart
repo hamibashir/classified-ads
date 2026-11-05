@@ -24,20 +24,23 @@ class AppTextStyles {
 
   static const TextStyle adTitle = TextStyle(
     fontSize: 15.0,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1.35,
+    letterSpacing: -0.1,
   );
 
   static const TextStyle price = TextStyle(
     fontSize: 18.0,
     fontWeight: FontWeight.w700,
     height: 1.2,
+    fontFeatures: [FontFeature.tabularFigures()],
   );
 
   static const TextStyle priceLarge = TextStyle(
     fontSize: 22.0,
     fontWeight: FontWeight.w700,
     height: 1.2,
+    fontFeatures: [FontFeature.tabularFigures()],
   );
 
   static const TextStyle body = TextStyle(

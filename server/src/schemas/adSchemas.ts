@@ -75,7 +75,10 @@ export type AdStatusUpdateInput = z.infer<typeof adStatusUpdateSchema>;
  */
 export const adFilterQuerySchema = z.object({
   search: z.string().trim().optional(),
-  categoryId: z.string().uuid().optional(),
+  q: z.string().trim().optional(),
+  category: z.string().trim().optional(),
+  subcat: z.string().trim().optional(),
+  categoryId: z.string().optional(),
   city: z.string().trim().optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),

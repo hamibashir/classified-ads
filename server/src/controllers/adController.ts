@@ -177,6 +177,9 @@ export const getAds = async (
     const query = (req.query as unknown as AdFilterQueryParams) || {};
     const {
       search,
+      q,
+      category,
+      subcat,
       categoryId,
       city,
       minPrice,
@@ -188,19 +191,36 @@ export const getAds = async (
       sortBy = 'newest',
       page = 1,
       limit = 20,
-    } = query;
+    } = query as any;
+
+    const searchTerm = search || q;
 
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.min(100, Math.max(1, Number(limit)));
 
-    // 1. Resolve category hierarchy: include children if parent is queried
+    // 1. Resolve category hierarchy: support subcat slug, category slug, or categoryId
     let categoryIds: string[] | undefined;
-    if (categoryId) {
-      const subcategories = await prisma.category.findMany({
-        where: { parentId: categoryId },
-        select: { id: true },
+    const catQuery = subcat || category || categoryId;
+    if (catQuery) {
+      const foundCategory = await prisma.category.findFirst({
+        where: {
+          OR: [
+            { id: catQuery },
+            { slug: catQuery },
+          ],
+        },
+        include: {
+          children: {
+            select: { id: true },
+          },
+        },
       });
-      categoryIds = [categoryId, ...subcategories.map((c) => c.id)];
+
+      if (foundCategory) {
+        categoryIds = [foundCategory.id, ...foundCategory.children.map((c) => c.id)];
+      } else {
+        categoryIds = [catQuery];
+      }
     }
 
     // 2. Branch: Spatial Haversine Query when lat and lng provided
@@ -275,10 +295,10 @@ export const getAds = async (
       where.condition = condition as AdCondition;
     }
 
-    if (search) {
+    if (searchTerm) {
       where.OR = [
-        { title: { contains: search } },
-        { description: { contains: search } },
+        { title: { contains: searchTerm } },
+        { description: { contains: searchTerm } },
       ];
     }
 

@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Light Theme
-  static const Color primaryLight = Color(0xFF0F766E); // Teal 700
+  // Light Theme (Option 1: Swiss Editorial & Racing Forest)
+  static const Color primaryLight = Color(0xFF0D382B); // British Racing Forest
   static const Color primaryForegroundLight = Color(0xFFFFFFFF);
-  static const Color backgroundLight = Color(0xFFF8FAFC); // Slate 50
+  static const Color backgroundLight = Color(0xFFFBFBFB); // Alabaster White
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color foregroundLight = Color(0xFF0F172A); // Slate 900
-  static const Color mutedLight = Color(0xFFF1F5F9); // Slate 100
-  static const Color mutedForegroundLight = Color(0xFF64748B); // Slate 500
-  static const Color borderLight = Color(0xFFE2E8F0); // Slate 200
-  static const Color priceLight = Color(0xFF047857); // Emerald 700
+  static const Color foregroundLight = Color(0xFF09090B); // Jet Black
+  static const Color mutedLight = Color(0xFFF4F4F5); // Zinc 100
+  static const Color mutedForegroundLight = Color(0xFF52525B); // Zinc 600
+  static const Color borderLight = Color(0xFFE4E4E7); // Zinc 200 Hairline
+  static const Color priceLight = Color(0xFF044E39); // Deep Rich Emerald
 
-  // Dark Theme
-  static const Color primaryDark = Color(0xFF14B8A6); // Teal 500
-  static const Color primaryForegroundDark = Color(0xFF042F2E);
-  static const Color backgroundDark = Color(0xFF0B0F17); // Deep Slate
-  static const Color surfaceDark = Color(0xFF131B2A);
-  static const Color cardDark = Color(0xFF131B2A);
-  static const Color foregroundDark = Color(0xFFF1F5F9); // Slate 100
-  static const Color mutedDark = Color(0xFF1E293B); // Slate 800
-  static const Color mutedForegroundDark = Color(0xFF94A3B8); // Slate 400
-  static const Color borderDark = Color(0xFF1E293B); // Slate 800
-  static const Color priceDark = Color(0xFF10B981); // Emerald 500
+  // Dark Theme (OLED Pitch Obsidian)
+  static const Color primaryDark = Color(0xFF2DD4BF); // Mint Teal Refined
+  static const Color primaryForegroundDark = Color(0xFF042F2E); // Deep Forest
+  static const Color backgroundDark = Color(0xFF0A0A0B); // Pitch Obsidian
+  static const Color surfaceDark = Color(0xFF121214); // Deep Zinc Card
+  static const Color cardDark = Color(0xFF121214);
+  static const Color foregroundDark = Color(0xFFFAFAFA); // Pure Milk
+  static const Color mutedDark = Color(0xFF27272A); // Zinc 800
+  static const Color mutedForegroundDark = Color(0xFFA1A1AA); // Zinc 400
+  static const Color borderDark = Color(0xFF27272A); // Zinc 800 Hairline
+  static const Color priceDark = Color(0xFF34D399); // Luminous Jade
 
   // Universal Marketplace Accents
-  static const Color whatsapp = Color(0xFF25D366);
+  static const Color whatsapp = Color(0xFF1FAF56); // Refined WhatsApp
   static const Color destructive = Color(0xFFDC2626);
   static const Color warning = Color(0xFFF59E0B);
-  static const Color negotiableBadge = Color(0xFF0284C7); // Sky 600
+  static const Color negotiableBadge = Color(0xFF0284C7); // Trust Sky Blue
 }
 
 @immutable

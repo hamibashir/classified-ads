@@ -2,21 +2,47 @@
 
 import React, { useState, useEffect } from 'react';
 import {
+  Car,
+  Smartphone,
+  Tv,
+  Home,
+  Bike,
+  Briefcase,
+  Wrench,
+  Shirt,
+  Armchair,
+  Dog,
+  BookOpen,
+  Baby,
   Tag,
-  MapPin,
-  Banknote,
-  Sparkles,
+  ChevronDown,
+  ChevronRight,
   RotateCcw,
   Check,
-  Compass,
-  CornerDownRight,
+  Banknote,
+  Sparkles,
+  MapPin,
+  LucideIcon,
 } from 'lucide-react';
 import { POPULAR_CATEGORIES } from '@/constants/categories';
 import { PAKISTANI_CITIES } from '@/constants/cities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-const RADIUS_OPTIONS = ['5', '10', '25', '50'] as const;
+const ICON_MAP: Record<string, LucideIcon> = {
+  Car,
+  Smartphone,
+  Tv,
+  Home,
+  Bike,
+  Briefcase,
+  Wrench,
+  Shirt,
+  Armchair,
+  Dog,
+  BookOpen,
+  Baby,
+};
 
 const PRICE_PRESETS = [
   { label: '< Rs 50K', min: '', max: '50000' },
@@ -29,14 +55,12 @@ interface FilterSidebarProps {
   selectedCategory?: string;
   selectedSubcategory?: string;
   selectedCity?: string;
-  radius?: string;
   minPrice?: string;
   maxPrice?: string;
   condition?: string;
   onCategoryChange: (slug: string) => void;
   onSubcategoryChange?: (subcatSlug: string) => void;
   onCityChange: (cityId: string) => void;
-  onRadiusChange?: (radiusVal: string) => void;
   onPriceChange: (min: string, max: string) => void;
   onConditionChange: (condition: string) => void;
   onClearFilters: () => void;
@@ -47,14 +71,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   selectedCategory = '',
   selectedSubcategory = '',
   selectedCity = '',
-  radius = '',
   minPrice = '',
   maxPrice = '',
   condition = '',
   onCategoryChange,
   onSubcategoryChange,
   onCityChange,
-  onRadiusChange,
   onPriceChange,
   onConditionChange,
   onClearFilters,
@@ -63,10 +85,23 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [localMin, setLocalMin] = useState<string>(minPrice);
   const [localMax, setLocalMax] = useState<string>(maxPrice);
 
+  // Keep track of explicitly expanded categories
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     setLocalMin(minPrice);
     setLocalMax(maxPrice);
   }, [minPrice, maxPrice]);
+
+  // Automatically expand the active category
+  useEffect(() => {
+    if (selectedCategory) {
+      setExpandedCategories((prev) => ({
+        ...prev,
+        [selectedCategory]: true,
+      }));
+    }
+  }, [selectedCategory]);
 
   const handleApplyPrice = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,11 +114,18 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     onPriceChange(presetMin, presetMax);
   };
 
+  const toggleCategoryExpand = (catSlug: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catSlug]: !prev[catSlug],
+    }));
+  };
+
   const hasActiveFilters = Boolean(
     selectedCategory ||
       selectedSubcategory ||
       selectedCity ||
-      radius ||
       minPrice ||
       maxPrice ||
       condition
@@ -91,12 +133,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   return (
     <aside className={`w-full space-y-6 ${className}`}>
-      {/* Sidebar Header & Clear All Action */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-        <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+      {/* Sidebar Header & Reset Action */}
+      <div className="flex items-center justify-between pb-3 border-b border-border/80">
+        <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
           <span>Filters</span>
           {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-teal-600" />
+            <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400" />
           )}
         </h3>
         {hasActiveFilters && (
@@ -107,7 +149,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               setLocalMax('');
               onClearFilters();
             }}
-            className="text-xs font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 transition-colors"
+            className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset All</span>
@@ -115,86 +157,121 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         )}
       </div>
 
-      {/* 1. Category & Expandable Subcategories Navigation */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Tag className="w-3.5 h-3.5 text-teal-700" />
-          <span>Categories & Subcategories</span>
-        </h4>
-        <div className="space-y-1 max-h-72 overflow-y-auto pr-1 text-sm no-scrollbar">
+      {/* 1. Category & Subcategories Navigation Left Menu */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
+            <span>Categories</span>
+          </h4>
+          <span className="text-[10px] text-muted-foreground font-mono">12 Verticals</span>
+        </div>
+
+        <div className="space-y-0.5 text-xs">
+          {/* All Categories Button */}
           <button
             type="button"
             onClick={() => {
               onCategoryChange('');
               if (onSubcategoryChange) onSubcategoryChange('');
             }}
-            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
+            className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
               !selectedCategory
-                ? 'bg-teal-50 text-teal-900 font-semibold'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold'
+                : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'
             }`}
           >
-            <span>All Categories</span>
-            {!selectedCategory && <Check className="w-3.5 h-3.5 text-teal-700" />}
+            <span className="font-medium">All Categories</span>
+            {!selectedCategory && <Check className="w-3.5 h-3.5" />}
           </button>
 
+          {/* List of Categories & Drilldown Subcategories */}
           {POPULAR_CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat.slug;
+            const isCatSelected = selectedCategory === cat.slug || selectedCategory === cat.id;
+            const isExpanded = expandedCategories[cat.slug] ?? isCatSelected;
+            const hasSubcategories = Boolean(cat.subcategories && cat.subcategories.length > 0);
+            const IconComponent = ICON_MAP[cat.iconName] || Tag;
+
             return (
-              <div key={cat.id} className="space-y-1">
-                <button
-                  type="button"
+              <div key={cat.id} className="space-y-0.5">
+                {/* Parent Category Row */}
+                <div
                   onClick={() => {
-                    const nextCat = isSelected ? '' : cat.slug;
-                    onCategoryChange(nextCat);
+                    onCategoryChange(cat.slug);
                     if (onSubcategoryChange) onSubcategoryChange('');
+                    setExpandedCategories((prev) => ({ ...prev, [cat.slug]: true }));
                   }}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
-                    isSelected
-                      ? 'bg-teal-50 text-teal-900 font-semibold'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer select-none group ${
+                    isCatSelected && !selectedSubcategory
+                      ? 'bg-emerald-950/15 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 font-semibold border border-emerald-600/30'
+                      : isCatSelected
+                      ? 'text-foreground font-semibold bg-secondary/40'
+                      : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
                   }`}
                 >
-                  <span className="truncate">{cat.name}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-teal-700" />}
-                </button>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <IconComponent className="w-3.5 h-3.5 shrink-0 text-zinc-400 group-hover:text-foreground" />
+                    <span className="truncate">{cat.name}</span>
+                  </div>
 
-                {/* Subcategories drill-down list */}
-                {isSelected && cat.subcategories && cat.subcategories.length > 0 && (
-                  <div className="pl-4 pr-1 py-1 space-y-1 bg-slate-50/80 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-1 shrink-0">
+                    {hasSubcategories && (
+                      <button
+                        type="button"
+                        onClick={(e) => toggleCategoryExpand(cat.slug, e)}
+                        className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        title={isExpanded ? 'Collapse' : 'Expand'}
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Subcategories Expandable Drill-Down List */}
+                {hasSubcategories && isExpanded && (
+                  <div className="ml-4 pl-2.5 my-0.5 border-l border-border/80 space-y-0.5 animate-in fade-in-50 duration-150">
+                    {/* All in Category */}
                     <button
                       type="button"
-                      onClick={() => onSubcategoryChange && onSubcategoryChange('')}
-                      className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs text-left transition-colors ${
-                        !selectedSubcategory
-                          ? 'text-teal-800 font-semibold bg-teal-100/60'
-                          : 'text-slate-600 hover:text-slate-900'
+                      onClick={() => {
+                        onCategoryChange(cat.slug);
+                        if (onSubcategoryChange) onSubcategoryChange('');
+                      }}
+                      className={`w-full flex items-center justify-between px-2 py-1 rounded-md text-[11px] text-left transition-colors cursor-pointer ${
+                        isCatSelected && !selectedSubcategory
+                          ? 'bg-[#0D382B] text-white dark:bg-emerald-500 dark:text-zinc-950 font-semibold'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                       }`}
                     >
                       <span>All in {cat.name}</span>
-                      {!selectedSubcategory && <Check className="w-3 h-3 text-teal-700" />}
+                      {isCatSelected && !selectedSubcategory && <Check className="w-3 h-3" />}
                     </button>
-                    {cat.subcategories.map((sub) => {
-                      const isSubSelected = selectedSubcategory === sub.slug;
+
+                    {/* Individual Subcategories */}
+                    {cat.subcategories!.map((sub) => {
+                      const isSubSelected = isCatSelected && selectedSubcategory === sub.slug;
                       return (
                         <button
                           key={sub.id}
                           type="button"
-                          onClick={() =>
-                            onSubcategoryChange &&
-                            onSubcategoryChange(isSubSelected ? '' : sub.slug)
-                          }
-                          className={`w-full flex items-center justify-between px-2 py-1 rounded text-xs text-left transition-colors ${
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCategoryChange(cat.slug);
+                            if (onSubcategoryChange) onSubcategoryChange(sub.slug);
+                          }}
+                          className={`w-full flex items-center justify-between px-2 py-1 rounded-md text-[11px] text-left transition-colors cursor-pointer ${
                             isSubSelected
-                              ? 'text-teal-800 font-semibold bg-teal-100/60'
-                              : 'text-slate-600 hover:text-slate-900'
+                              ? 'bg-[#0D382B] text-white dark:bg-emerald-500 dark:text-zinc-950 font-semibold shadow-2xs'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                           }`}
                         >
-                          <span className="flex items-center gap-1.5 truncate">
-                            <CornerDownRight className="w-2.5 h-2.5 text-slate-400" />
-                            {sub.name}
-                          </span>
-                          {isSubSelected && <Check className="w-3 h-3 text-teal-700" />}
+                          <span className="truncate">{sub.name}</span>
+                          {isSubSelected && <Check className="w-3 h-3" />}
                         </button>
                       );
                     })}
@@ -206,16 +283,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
       </div>
 
-      {/* 2. City Location Filter */}
-      <div className="space-y-3 pt-3 border-t border-slate-100">
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-teal-700" />
+      {/* 2. City / Location Filter */}
+      <div className="space-y-2.5 pt-3 border-t border-border/60">
+        <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
           <span>City / Location</span>
         </h4>
         <select
           value={selectedCity}
           onChange={(e) => onCityChange(e.target.value)}
-          className="w-full text-xs sm:text-sm rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
+          aria-label="Filter by city"
+          className="w-full text-xs rounded-xl border border-border/80 bg-card px-3 py-2 text-foreground focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 cursor-pointer"
         >
           <option value="">All Pakistan (Nationwide)</option>
           {PAKISTANI_CITIES.map((c) => (
@@ -226,46 +304,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </select>
       </div>
 
-      {/* 3. Proximity Radius Filter */}
-      {selectedCity && onRadiusChange && (
-        <div className="space-y-2.5 pt-3 border-t border-slate-100 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-teal-700" />
-              <span>Proximity Radius</span>
-            </h4>
-            {radius && (
-              <span className="text-[11px] font-semibold text-teal-700">
-                within {radius} km
-              </span>
-            )}
-          </div>
-          <div className="grid grid-cols-4 gap-1.5">
-            {RADIUS_OPTIONS.map((r) => {
-              const isSelected = radius === r;
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => onRadiusChange(isSelected ? '' : r)}
-                  className={`py-1 text-xs font-semibold rounded-md border transition-all ${
-                    isSelected
-                      ? 'bg-teal-700 text-white border-teal-700 shadow-2xs'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  {r} km
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 4. PKR Price Range & Budget Presets Filter */}
-      <div className="space-y-3 pt-3 border-t border-slate-100">
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Banknote className="w-3.5 h-3.5 text-teal-700" />
+      {/* 3. PKR Price Range & Budget Presets Filter */}
+      <div className="space-y-3 pt-3 border-t border-border/60">
+        <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <Banknote className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
           <span>Price Range (PKR)</span>
         </h4>
 
@@ -278,10 +320,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 key={p.label}
                 type="button"
                 onClick={() => handleSelectPreset(isSelected ? '' : p.min, isSelected ? '' : p.max)}
-                className={`py-1 px-1.5 text-[11px] font-semibold rounded-md border transition-all truncate text-center ${
+                className={`py-1 px-1.5 text-[11px] font-semibold rounded-lg border transition-colors truncate text-center cursor-pointer ${
                   isSelected
-                    ? 'bg-teal-700 text-white border-teal-700 shadow-2xs'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent shadow-xs'
+                    : 'bg-card text-muted-foreground border-border/80 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-foreground'
                 }`}
               >
                 {p.label}
@@ -297,7 +339,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               placeholder="Min PKR"
               value={localMin}
               onChange={(e) => setLocalMin(e.target.value)}
-              className="text-xs h-8"
+              className="text-xs h-8 rounded-lg"
               min="0"
             />
             <Input
@@ -305,7 +347,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               placeholder="Max PKR"
               value={localMax}
               onChange={(e) => setLocalMax(e.target.value)}
-              className="text-xs h-8"
+              className="text-xs h-8 rounded-lg"
               min="0"
             />
           </div>
@@ -313,17 +355,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             type="submit"
             variant="outline"
             size="sm"
-            className="w-full h-7 text-xs font-semibold text-slate-700 border-slate-300 hover:bg-slate-50"
+            className="w-full h-8 text-xs font-semibold rounded-lg border-border/80 hover:border-zinc-400 dark:hover:border-zinc-600"
           >
             Apply Price
           </Button>
         </form>
       </div>
 
-      {/* 5. Item Condition Checkboxes */}
-      <div className="space-y-3 pt-3 border-t border-slate-100">
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-teal-700" />
+      {/* 4. Condition Checkboxes */}
+      <div className="space-y-2.5 pt-3 border-t border-border/60">
+        <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
           <span>Condition</span>
         </h4>
         <div className="space-y-2">
@@ -336,13 +378,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <label
                 key={cond.value}
                 onClick={() => onConditionChange(isChecked ? '' : cond.value)}
-                className="flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer select-none hover:text-slate-900"
+                className="flex items-center gap-2.5 text-xs font-medium text-foreground cursor-pointer select-none"
               >
                 <div
                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
                     isChecked
-                      ? 'bg-teal-700 border-teal-700 text-white'
-                      : 'border-slate-300 bg-white'
+                      ? 'bg-[#0D382B] dark:bg-emerald-500 border-transparent text-white dark:text-zinc-950'
+                      : 'border-border/80 bg-card'
                   }`}
                 >
                   {isChecked && <Check className="w-3 h-3 stroke-[3]" />}

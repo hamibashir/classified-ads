@@ -16,6 +16,7 @@ import {
   BookOpen,
   Baby,
   Tag,
+  ArrowUpRight,
   LucideIcon,
 } from 'lucide-react';
 import { CategoryItem } from '@/types/category';
@@ -45,18 +46,27 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   return (
     <Link
       href={`/search?category=${encodeURIComponent(category.slug)}`}
-      className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-teal-400 hover:-translate-y-1 transition-all duration-200 text-center"
+      className="group relative flex flex-col justify-between p-3.5 sm:p-4 rounded-xl bg-card border border-border/80 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors duration-150 text-left min-h-[104px] sm:min-h-[116px]"
       title={category.description || category.name}
     >
-      <div
-        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-2.5 transition-transform duration-200 group-hover:scale-110 ${category.bgTint}`}
-      >
-        <IconComponent className={`w-6 h-6 sm:w-7 sm:h-7 ${category.color}`} />
+      {/* Top Row: Icon Container + Micro Outward Arrow */}
+      <div className="flex items-center justify-between w-full mb-2.5">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-all duration-200 group-hover:bg-[#0D382B] group-hover:text-white dark:group-hover:bg-emerald-500 dark:group-hover:text-zinc-950">
+          <IconComponent className="w-4.5 h-4.5 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:scale-105" />
+        </div>
+
+        <ArrowUpRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
       </div>
 
-      <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-teal-700 transition-colors line-clamp-1 w-full">
-        {category.name}
-      </span>
+      {/* Bottom Info: Title & Subtle Subtext */}
+      <div className="space-y-0.5 w-full">
+        <h3 className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-[#0D382B] dark:group-hover:text-emerald-400 transition-colors truncate">
+          {category.name}
+        </h3>
+        <p className="text-[11px] text-muted-foreground truncate leading-snug">
+          {category.description || 'Explore deals'}
+        </p>
+      </div>
     </Link>
   );
 };
