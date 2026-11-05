@@ -117,11 +117,15 @@ export const SimilarAdsSection: React.FC<SimilarAdsSectionProps> = ({
         if (categorySlug) queryParams.set('category', categorySlug);
         queryParams.set('limit', '4');
 
-        const res = await apiClient.get<{ ads: AdListItem[] }>(
+        const res = await apiClient.get<AdListItem[]>(
           `/ads?${queryParams.toString()}`
         );
 
-        const list = res.data?.ads || [];
+        const list: AdListItem[] = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+          ? res.data
+          : (res as { data?: { ads?: AdListItem[] } })?.data?.ads || [];
         const filtered = list.filter((item) => item.id !== currentAdId);
 
         if (isMounted) {

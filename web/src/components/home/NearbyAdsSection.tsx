@@ -214,7 +214,7 @@ export const NearbyAdsSection: React.FC = () => {
     setLoading(true);
     try {
       // Attempt backend API fetch
-      const response = await apiClient.get<{ ads: AdListItem[] } | AdListItem[]>('/ads', {
+      const response = await apiClient.get<AdListItem[]>('/ads', {
         params: {
           lat: activeAnchor.latitude,
           lng: activeAnchor.longitude,
@@ -224,8 +224,10 @@ export const NearbyAdsSection: React.FC = () => {
         },
       });
 
-      const items = Array.isArray(response)
+      const items: AdListItem[] = Array.isArray(response)
         ? response
+        : Array.isArray((response as { data?: AdListItem[] })?.data)
+        ? (response as { data: AdListItem[] }).data
         : (response as { ads?: AdListItem[] }).ads || [];
 
       if (items.length > 0) {

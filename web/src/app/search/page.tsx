@@ -310,12 +310,14 @@ function SearchContainer() {
       if (maxPrice) params.maxPrice = maxPrice;
       if (condition) params.condition = condition;
 
-      const response = await apiClient.get<{ ads: AdListItem[] } | AdListItem[]>('/ads', {
+      const response = await apiClient.get<AdListItem[]>('/ads', {
         params,
       });
 
-      const items = Array.isArray(response)
+      const items: AdListItem[] = Array.isArray(response)
         ? response
+        : Array.isArray((response as { data?: AdListItem[] })?.data)
+        ? (response as { data: AdListItem[] }).data
         : (response as { ads?: AdListItem[] }).ads || [];
 
       if (items.length > 0) {
