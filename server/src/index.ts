@@ -23,6 +23,8 @@ const app: Application = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 // Security Headers
 app.use(
   helmet({
@@ -33,10 +35,25 @@ app.use(
 // CORS Configuration
 app.use(
   cors({
-    origin: [CLIENT_URL, 'http://localhost:3000'],
+    origin: (origin, callback) => {
+      // Allow non-browser requests (mobile native apps, curl, Postman)
+      if (!origin) return callback(null, true);
+
+      // In development, allow any localhost or 127.0.0.1 origin (Next.js, Flutter Web, etc.)
+      if (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      const allowedOrigins = [CLIENT_URL, 'http://localhost:3000'];
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 

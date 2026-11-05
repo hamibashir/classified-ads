@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../core/constants/api_constants.dart';
 
 class AdSeller {
   final String id;
@@ -183,10 +184,20 @@ class AdModel {
     final imageList = <String>[];
     if (rawImages is List) {
       for (final img in rawImages) {
+        String? url;
         if (img is String) {
-          imageList.add(img);
+          url = img;
         } else if (img is Map && img['url'] != null) {
-          imageList.add(img['url'].toString());
+          url = img['url'].toString();
+        }
+        if (url != null && url.isNotEmpty) {
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            imageList.add(url);
+          } else if (url.startsWith('/')) {
+            imageList.add('${ApiConstants.socketUrl}$url');
+          } else {
+            imageList.add('${ApiConstants.socketUrl}/$url');
+          }
         }
       }
     }

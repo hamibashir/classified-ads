@@ -1,15 +1,31 @@
-class ApiConstants {
-  // In development, Android emulator connects to host machine via 10.0.2.2.
-  // For physical Android / iOS, override with host machine LAN IP.
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5000/api/v1',
-  );
+import 'package:flutter/foundation.dart';
 
-  static const String socketUrl = String.fromEnvironment(
-    'SOCKET_URL',
-    defaultValue: 'http://10.0.2.2:5000',
-  );
+class ApiConstants {
+  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String _envSocketUrl = String.fromEnvironment('SOCKET_URL');
+
+  // Automatically resolves host based on platform:
+  // - Flutter Web: http://localhost:5000/api/v1
+  // - Android Emulator: http://10.0.2.2:5000/api/v1
+  // - iOS / Desktop: http://localhost:5000/api/v1
+  // - Explicit override: via --dart-define=API_BASE_URL=...
+  static String get baseUrl {
+    if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
+    if (kIsWeb) return 'http://localhost:5000/api/v1';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:5000/api/v1';
+    }
+    return 'http://localhost:5000/api/v1';
+  }
+
+  static String get socketUrl {
+    if (_envSocketUrl.isNotEmpty) return _envSocketUrl;
+    if (kIsWeb) return 'http://localhost:5000';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:5000';
+    }
+    return 'http://localhost:5000';
+  }
 
   // Authentication endpoints
   static const String login = '/auth/login';

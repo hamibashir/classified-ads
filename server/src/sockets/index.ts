@@ -9,11 +9,20 @@ let ioInstance: SocketIOServer | null = null;
  * Initializes and binds the Socket.IO server to the HTTP server instance
  */
 export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
+  const isDev = process.env.NODE_ENV !== 'production';
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
 
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: [clientUrl, 'http://localhost:3000'],
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+          return callback(null, true);
+        }
+        const allowed = [clientUrl, 'http://localhost:3000'];
+        if (allowed.includes(origin)) return callback(null, true);
+        return callback(new Error(`Socket CORS blocked origin: ${origin}`));
+      },
       credentials: true,
       methods: ['GET', 'POST'],
     },
