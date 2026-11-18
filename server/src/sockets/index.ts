@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { socketAuthMiddleware } from './middleware';
 import { registerChatHandlers } from './chatHandlers';
+import { isOriginAllowed } from '../utils/cors';
 
 let ioInstance: SocketIOServer | null = null;
 
@@ -15,12 +16,9 @@ export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
   const io = new SocketIOServer(httpServer, {
     cors: {
       origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        if (isOriginAllowed(origin, clientUrl, isDev)) {
           return callback(null, true);
         }
-        const allowed = [clientUrl, 'http://localhost:3000'];
-        if (allowed.includes(origin)) return callback(null, true);
         return callback(new Error(`Socket CORS blocked origin: ${origin}`));
       },
       credentials: true,

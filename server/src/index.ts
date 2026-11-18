@@ -8,6 +8,7 @@ import { requestLogger } from './middleware/logger';
 import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler';
 import { sendSuccess } from './utils/apiResponse';
 import { connectDB, disconnectDB, getDbStatus } from './config/db';
+import { isOriginAllowed } from './utils/cors';
 import { initSocketServer, getIO } from './sockets';
 import authRoutes from './routes/authRoutes';
 import categoryRoutes from './routes/categoryRoutes';
@@ -36,19 +37,9 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow non-browser requests (mobile native apps, curl, Postman)
-      if (!origin) return callback(null, true);
-
-      // In development, allow any localhost or 127.0.0.1 origin (Next.js, Flutter Web, etc.)
-      if (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      if (isOriginAllowed(origin, CLIENT_URL, isDev)) {
         return callback(null, true);
       }
-
-      const allowedOrigins = [CLIENT_URL, 'http://localhost:3000'];
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
