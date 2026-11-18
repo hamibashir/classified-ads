@@ -304,7 +304,7 @@ export function PostAdStepImages({
                   }`}
                 >
                   {/* Photo Container */}
-                  <div className="relative aspect-4/3 w-full bg-muted overflow-hidden">
+                  <div className="relative aspect-[4/3] w-full bg-muted overflow-hidden">
                     <Image
                       src={img.url}
                       alt={`Ad photo ${index + 1}`}

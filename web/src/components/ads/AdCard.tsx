@@ -49,7 +49,7 @@ export const AdCard: React.FC<AdCardProps> = ({
     return (
       <Link href={`/ads/${ad.slug}`} className="block group">
         <Card
-          className={`overflow-hidden hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors duration-150 border-border/80 bg-card rounded-xl flex flex-col sm:flex-row items-stretch ${className}`}
+          className={`overflow-hidden card-hover-lift border-border/80 bg-card rounded-xl flex flex-col sm:flex-row items-stretch ${className}`}
         >
           {/* Left Thumbnail Container */}
           <div className="relative w-full sm:w-48 md:w-56 shrink-0 aspect-[16/10] sm:aspect-auto bg-muted/40 flex items-center justify-center overflow-hidden ring-1 ring-inset ring-black/[0.04] dark:ring-white/[0.06]">
@@ -155,7 +155,7 @@ export const AdCard: React.FC<AdCardProps> = ({
   return (
     <Link href={`/ads/${ad.slug}`} className="block group">
       <Card
-        className={`overflow-hidden hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors duration-150 border-border/80 bg-card rounded-xl flex flex-col justify-between h-full ${className}`}
+        className={`overflow-hidden card-hover-lift border-border/80 bg-card rounded-xl flex flex-col justify-between h-full ${className}`}
       >
         <div>
           {/* Media Container (16:10 Ratio, Crisp Inset Ring) */}

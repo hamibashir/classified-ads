@@ -11,6 +11,7 @@ import {
   revealAdPhone,
   toggleFavoriteAd,
   getFavoriteAds,
+  recordAdView,
 } from '../controllers/adController';
 import { authenticateUser, optionalAuth } from '../middleware/auth';
 import { revealPhoneLimiter } from '../middleware/rateLimiter';
@@ -146,6 +147,16 @@ router.post(
   revealPhoneLimiter,
   validateRequest({ params: adIdParamSchema }),
   revealAdPhone
+);
+
+/**
+ * @route   POST /api/v1/ads/:id/view
+ * @desc    Increment ad view counter
+ * @access  Public
+ */
+router.post(
+  '/:id/view',
+  recordAdView
 );
 
 /**

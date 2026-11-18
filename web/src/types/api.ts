@@ -1,5 +1,5 @@
 /**
- * Shared API Types & Envelopes for Classified Ads PK Web Client
+ * Shared API Types & Envelopes for Zaaz B Web Client
  */
 
 export interface PaginationMeta {

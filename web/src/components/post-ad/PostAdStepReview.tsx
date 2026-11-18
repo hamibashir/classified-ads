@@ -453,7 +453,7 @@ export function PostAdStepReview({
       <div className="p-4 rounded-xl bg-slate-100/80 border border-border/80 flex items-start gap-3 text-xs text-muted-foreground">
         <Share2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          By clicking &ldquo;Publish My Ad&rdquo;, you agree that your listing complies with Pakistani Classified Ads community guidelines. Counterfeit products, prohibited items, or misleading information will be flagged.
+          By clicking &ldquo;Publish My Ad&rdquo;, you agree that your listing complies with Zaaz B community guidelines. Counterfeit products, prohibited items, or misleading information will be flagged.
         </p>
       </div>
 

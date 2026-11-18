@@ -103,6 +103,54 @@ const CATEGORIES_DATA: CategorySeed[] = [
       { name: 'Packers & Movers', slug: 'packers-movers', icon: 'truck', order: 3 },
     ],
   },
+  {
+    name: 'Furniture & Home Decor',
+    slug: 'furniture',
+    icon: 'armchair',
+    order: 8,
+    subcategories: [
+      { name: 'Sofa & Chairs', slug: 'sofa-chairs', icon: 'armchair', order: 1 },
+      { name: 'Beds & Wardrobes', slug: 'beds-wardrobes', icon: 'bed', order: 2 },
+      { name: 'Tables & Dining Sets', slug: 'tables-dining', icon: 'table', order: 3 },
+      { name: 'Home Decor & Rugs', slug: 'home-decor', icon: 'home', order: 4 },
+    ],
+  },
+  {
+    name: 'Animals & Pets',
+    slug: 'animals',
+    icon: 'dog',
+    order: 9,
+    subcategories: [
+      { name: 'Birds & Parrots', slug: 'birds', icon: 'feather', order: 1 },
+      { name: 'Cats & Dogs', slug: 'cats-dogs', icon: 'heart', order: 2 },
+      { name: 'Livestock & Cattle', slug: 'livestock', icon: 'truck', order: 3 },
+      { name: 'Pet Food & Accessories', slug: 'pet-accessories', icon: 'shopping-bag', order: 4 },
+    ],
+  },
+  {
+    name: 'Sports & Hobbies',
+    slug: 'sports-hobbies',
+    icon: 'book-open',
+    order: 10,
+    subcategories: [
+      { name: 'Gym & Fitness', slug: 'gym-fitness', icon: 'activity', order: 1 },
+      { name: 'Sports Equipment', slug: 'sports-equipment', icon: 'target', order: 2 },
+      { name: 'Musical Instruments', slug: 'musical-instruments', icon: 'music', order: 3 },
+      { name: 'Books & Magazines', slug: 'books-magazines', icon: 'book', order: 4 },
+    ],
+  },
+  {
+    name: 'Kids & Babies',
+    slug: 'kids',
+    icon: 'baby',
+    order: 11,
+    subcategories: [
+      { name: 'Prams & Strollers', slug: 'prams-strollers', icon: 'compass', order: 1 },
+      { name: 'Toys & Ride-ons', slug: 'toys-games', icon: 'smile', order: 2 },
+      { name: 'Kids Clothing', slug: 'kids-clothing', icon: 'shirt', order: 3 },
+      { name: 'Baby Gear & Cots', slug: 'baby-gear', icon: 'shield', order: 4 },
+    ],
+  },
 ];
 
 async function seedCategories(): Promise<{ parentCount: number; subCount: number }> {
@@ -212,7 +260,7 @@ async function seedSystemSettings(): Promise<number> {
 async function seedAdminUser(): Promise<string> {
   console.log('[Seed] Seeding default administrator account...');
 
-  const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@classifiedads.pk';
+  const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@zaazb.com';
   const plainPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123456!';
   const passwordHash = await bcrypt.hash(plainPassword, 10);
 
@@ -239,7 +287,7 @@ async function seedAdminUser(): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  console.log('--- Starting Classified Ads PK Database Seed ---');
+  console.log('--- Starting Zaaz B Database Seed ---');
   const startTime = Date.now();
 
   const { parentCount, subCount } = await seedCategories();

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { AdListItem } from '@/types/ad';
 import { apiClient } from '@/lib/api-client';
+import { SEARCH_FALLBACK_ADS } from '@/constants/fallbackSearchAds';
+import { POPULAR_CATEGORIES } from '@/constants/categories';
 import { AdCard } from './AdCard';
 import { AdCardSkeleton } from './AdCardSkeleton';
 
@@ -15,89 +17,64 @@ interface SimilarAdsSectionProps {
   cityName?: string;
 }
 
-const FALLBACK_SIMILAR: AdListItem[] = [
-  {
-    id: 'sim-1',
-    title: 'Honda City 1.2L CVT 2022 (Super White, 1st Owner)',
-    slug: 'honda-city-12l-cvt-2022-lahore',
-    price: 4350000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'USED',
-    locationCity: 'Lahore',
-    locationAddress: 'Model Town',
-    locationState: 'Punjab',
-    latitude: 31.4826,
-    longitude: 74.3214,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 680,
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-    images: [
-      {
-        id: 'img-sim-1',
-        url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
-  },
-  {
-    id: 'sim-2',
-    title: 'Toyota Yaris ATIV 1.3 CVT 2021 (Genuine Paint, Dealership Maintained)',
-    slug: 'toyota-yaris-ativ-13-cvt-2021-lahore',
-    price: 3950000,
-    currency: 'PKR',
-    isNegotiable: false,
-    condition: 'USED',
-    locationCity: 'Lahore',
-    locationAddress: 'DHA Phase 3',
-    locationState: 'Punjab',
-    latitude: 31.4746,
-    longitude: 74.3742,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 540,
-    createdAt: new Date(Date.now() - 14400000).toISOString(),
-    images: [
-      {
-        id: 'img-sim-2',
-        url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
-  },
-  {
-    id: 'sim-3',
-    title: 'Suzuki Swift GLX CVT 2023 (Zero Meter Delivery)',
-    slug: 'suzuki-swift-glx-cvt-2023-islamabad',
-    price: 4700000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'NEW',
-    locationCity: 'Islamabad',
-    locationAddress: 'Blue Area',
-    locationState: 'Islamabad Capital Territory',
-    latitude: 33.7115,
-    longitude: 73.0645,
-    showPhone: true,
-    allowWhatsapp: false,
-    viewsCount: 910,
-    createdAt: new Date(Date.now() - 28800000).toISOString(),
-    images: [
-      {
-        id: 'img-sim-3',
-        url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
-  },
-];
+/**
+ * Resolves the parent category slug from subcategories
+ */
+function getParentCategorySlug(slug?: string): string | null {
+  if (!slug) return null;
+  const s = slug.toLowerCase();
+  for (const cat of POPULAR_CATEGORIES) {
+    if (cat.slug === s) return cat.slug;
+    if (cat.subcategories?.some((sub) => sub.slug === s)) {
+      return cat.slug;
+    }
+  }
+  return null;
+}
+
+/**
+ * Selects category-accurate fallback listings matching the current ad's niche
+ */
+function getCategoryFallbackAds(
+  categorySlug?: string,
+  currentAdId?: string,
+  cityName?: string
+): AdListItem[] {
+  if (!categorySlug) return [];
+  const targetSlug = categorySlug.toLowerCase();
+  const parentSlug = getParentCategorySlug(targetSlug);
+
+  // 1. Exact subcategory or category slug match
+  const exact = SEARCH_FALLBACK_ADS.filter((item) => {
+    if (item.id === currentAdId) return false;
+    return item.subcatSlug === targetSlug || item.category?.slug === targetSlug;
+  });
+
+  // 2. Parent category matches (e.g., if looking at laptops, include other electronics/gadgets)
+  const parentMatches = parentSlug
+    ? SEARCH_FALLBACK_ADS.filter((item) => {
+        if (item.id === currentAdId) return false;
+        return (
+          (item.category?.slug === parentSlug || item.subcatSlug === parentSlug) &&
+          !exact.some((e) => e.id === item.id)
+        );
+      })
+    : [];
+
+  const combined = [...exact, ...parentMatches];
+
+  // 3. Prioritize same city if available
+  if (cityName) {
+    const cityLower = cityName.toLowerCase();
+    combined.sort((a, b) => {
+      const aCity = (a.locationCity || '').toLowerCase() === cityLower ? 1 : 0;
+      const bCity = (b.locationCity || '').toLowerCase() === cityLower ? 1 : 0;
+      return bCity - aCity;
+    });
+  }
+
+  return combined;
+}
 
 export const SimilarAdsSection: React.FC<SimilarAdsSectionProps> = ({
   currentAdId,
@@ -110,30 +87,74 @@ export const SimilarAdsSection: React.FC<SimilarAdsSectionProps> = ({
 
   useEffect(() => {
     let isMounted = true;
+
     async function loadSimilar() {
       setLoading(true);
       try {
-        const queryParams = new URLSearchParams();
-        if (categorySlug) queryParams.set('category', categorySlug);
-        queryParams.set('limit', '4');
+        let dbAds: AdListItem[] = [];
 
-        const res = await apiClient.get<AdListItem[]>(
-          `/ads?${queryParams.toString()}`
-        );
+        // 1. Fetch matching ads from DB for this subcategory
+        if (categorySlug) {
+          try {
+            const res = await apiClient.get<{ ads?: AdListItem[] } | AdListItem[]>(`/ads?category=${encodeURIComponent(categorySlug)}&limit=8`);
+            const raw = res?.data || res;
+            const list: AdListItem[] = Array.isArray(raw)
+              ? raw
+              : Array.isArray((raw as { ads?: AdListItem[] })?.ads)
+              ? (raw as { ads?: AdListItem[] }).ads || []
+              : [];
+            dbAds = list.filter((item) => item.id !== currentAdId);
+          } catch {
+            dbAds = [];
+          }
+        }
 
-        const list: AdListItem[] = Array.isArray(res)
-          ? res
-          : Array.isArray(res?.data)
-          ? res.data
-          : (res as { data?: { ads?: AdListItem[] } })?.data?.ads || [];
-        const filtered = list.filter((item) => item.id !== currentAdId);
+        // 2. If fewer than 3 ads in subcategory, query parent category in DB
+        const parentSlug = getParentCategorySlug(categorySlug);
+        if (dbAds.length < 3 && parentSlug && parentSlug !== categorySlug) {
+          try {
+            const parentRes = await apiClient.get<{ ads?: AdListItem[] } | AdListItem[]>(`/ads?category=${encodeURIComponent(parentSlug)}&limit=8`);
+            const parentRaw = parentRes?.data || parentRes;
+            const parentList: AdListItem[] = Array.isArray(parentRaw)
+              ? parentRaw
+              : Array.isArray((parentRaw as { ads?: AdListItem[] })?.ads)
+              ? (parentRaw as { ads?: AdListItem[] }).ads || []
+              : [];
+            const extra = parentList.filter(
+              (item) => item.id !== currentAdId && !dbAds.some((d) => d.id === item.id)
+            );
+            dbAds = [...dbAds, ...extra];
+          } catch {
+            // Ignore
+          }
+        }
+
+        // 3. If still fewer than 3 ads, supplement with category-accurate fallbacks from SEARCH_FALLBACK_ADS
+        if (dbAds.length < 3) {
+          const fallbackMatches = getCategoryFallbackAds(categorySlug, currentAdId, cityName);
+          const needed = fallbackMatches.filter(
+            (fb) => !dbAds.some((d) => d.id === fb.id || d.slug === fb.slug)
+          );
+          dbAds = [...dbAds, ...needed];
+        }
+
+        // 4. Prioritize same city if present
+        if (cityName) {
+          const cityLower = cityName.toLowerCase();
+          dbAds.sort((a, b) => {
+            const aInCity = (a.locationCity || '').toLowerCase() === cityLower ? 1 : 0;
+            const bInCity = (b.locationCity || '').toLowerCase() === cityLower ? 1 : 0;
+            return bInCity - aInCity;
+          });
+        }
 
         if (isMounted) {
-          setAds(filtered.length > 0 ? filtered : FALLBACK_SIMILAR.filter((f) => f.id !== currentAdId));
+          setAds(dbAds.slice(0, 3));
         }
       } catch {
         if (isMounted) {
-          setAds(FALLBACK_SIMILAR.filter((f) => f.id !== currentAdId));
+          const fallbackMatches = getCategoryFallbackAds(categorySlug, currentAdId, cityName);
+          setAds(fallbackMatches.slice(0, 3));
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -144,7 +165,7 @@ export const SimilarAdsSection: React.FC<SimilarAdsSectionProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [currentAdId, categorySlug]);
+  }, [currentAdId, categorySlug, cityName]);
 
   if (!loading && ads.length === 0) {
     return null;

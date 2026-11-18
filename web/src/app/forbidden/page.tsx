@@ -33,7 +33,7 @@ export default function ForbiddenPage() {
             Admin Access Restricted
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            The Classified Ads PK administration console is restricted to verified platform administrators.
+            The Zaaz B administration console is restricted to verified platform administrators.
           </p>
         </div>
 

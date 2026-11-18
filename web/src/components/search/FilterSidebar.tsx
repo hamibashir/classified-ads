@@ -16,7 +16,6 @@ import {
   Baby,
   Tag,
   ChevronDown,
-  ChevronRight,
   RotateCcw,
   Check,
   Banknote,
@@ -58,8 +57,9 @@ interface FilterSidebarProps {
   minPrice?: string;
   maxPrice?: string;
   condition?: string;
-  onCategoryChange: (slug: string) => void;
+  onCategoryChange?: (slug: string) => void;
   onSubcategoryChange?: (subcatSlug: string) => void;
+  onCategorySelect?: (categorySlug: string, subcategorySlug?: string | null) => void;
   onCityChange: (cityId: string) => void;
   onPriceChange: (min: string, max: string) => void;
   onConditionChange: (condition: string) => void;
@@ -76,6 +76,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   condition = '',
   onCategoryChange,
   onSubcategoryChange,
+  onCategorySelect,
   onCityChange,
   onPriceChange,
   onConditionChange,
@@ -84,6 +85,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   const [localMin, setLocalMin] = useState<string>(minPrice);
   const [localMax, setLocalMax] = useState<string>(maxPrice);
+
+  const handleCategoryAction = (catSlug: string, subcatSlug?: string | null) => {
+    if (onCategorySelect) {
+      onCategorySelect(catSlug, subcatSlug);
+    } else {
+      if (onCategoryChange) {
+        onCategoryChange(catSlug);
+      }
+      if (onSubcategoryChange && subcatSlug !== undefined) {
+        onSubcategoryChange(subcatSlug || '');
+      }
+    }
+  };
 
   // Keep track of explicitly expanded categories
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -116,10 +130,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const toggleCategoryExpand = (catSlug: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [catSlug]: !prev[catSlug],
-    }));
+    setExpandedCategories((prev) => {
+      const isCurrentlyExpanded =
+        prev[catSlug] !== undefined ? prev[catSlug] : selectedCategory === catSlug;
+      return {
+        ...prev,
+        [catSlug]: !isCurrentlyExpanded,
+      };
+    });
   };
 
   const hasActiveFilters = Boolean(
@@ -172,8 +190,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <button
             type="button"
             onClick={() => {
-              onCategoryChange('');
-              if (onSubcategoryChange) onSubcategoryChange('');
+              handleCategoryAction('', null);
             }}
             className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
               !selectedCategory
@@ -197,9 +214,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 {/* Parent Category Row */}
                 <div
                   onClick={() => {
-                    onCategoryChange(cat.slug);
-                    if (onSubcategoryChange) onSubcategoryChange('');
-                    setExpandedCategories((prev) => ({ ...prev, [cat.slug]: true }));
+                    if (isCatSelected && !selectedSubcategory) {
+                      // Clicking an already active parent category toggles its subcategory dropdown smoothly
+                      setExpandedCategories((prev) => {
+                        const isCurrentlyExpanded =
+                          prev[cat.slug] !== undefined ? prev[cat.slug] : true;
+                        return { ...prev, [cat.slug]: !isCurrentlyExpanded };
+                      });
+                    } else {
+                      handleCategoryAction(cat.slug, null);
+                      setExpandedCategories((prev) => ({ ...prev, [cat.slug]: true }));
+                    }
                   }}
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer select-none group ${
                     isCatSelected && !selectedSubcategory
@@ -219,14 +244,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       <button
                         type="button"
                         onClick={(e) => toggleCategoryExpand(cat.slug, e)}
-                        className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer"
                         title={isExpanded ? 'Collapse' : 'Expand'}
                       >
-                        {isExpanded ? (
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        ) : (
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        )}
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-0' : '-rotate-90'
+                          }`}
+                        />
                       </button>
                     )}
                   </div>
@@ -234,13 +259,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
                 {/* Subcategories Expandable Drill-Down List */}
                 {hasSubcategories && isExpanded && (
-                  <div className="ml-4 pl-2.5 my-0.5 border-l border-border/80 space-y-0.5 animate-in fade-in-50 duration-150">
+                  <div className="ml-4 pl-2.5 my-0.5 border-l-2 border-emerald-600/30 dark:border-emerald-500/30 space-y-0.5 animate-in fade-in-50 duration-150">
                     {/* All in Category */}
                     <button
                       type="button"
-                      onClick={() => {
-                        onCategoryChange(cat.slug);
-                        if (onSubcategoryChange) onSubcategoryChange('');
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCategoryAction(cat.slug, null);
                       }}
                       className={`w-full flex items-center justify-between px-2 py-1 rounded-md text-[11px] text-left transition-colors cursor-pointer ${
                         isCatSelected && !selectedSubcategory
@@ -261,17 +286,16 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onCategoryChange(cat.slug);
-                            if (onSubcategoryChange) onSubcategoryChange(sub.slug);
+                            handleCategoryAction(cat.slug, isSubSelected ? null : sub.slug);
                           }}
                           className={`w-full flex items-center justify-between px-2 py-1 rounded-md text-[11px] text-left transition-colors cursor-pointer ${
                             isSubSelected
-                              ? 'bg-[#0D382B] text-white dark:bg-emerald-500 dark:text-zinc-950 font-semibold shadow-2xs'
+                              ? 'bg-[#0D382B] text-white dark:bg-emerald-500 dark:text-zinc-950 font-semibold'
                               : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                           }`}
                         >
                           <span className="truncate">{sub.name}</span>
-                          {isSubSelected && <Check className="w-3 h-3" />}
+                          {isSubSelected && <Check className="w-3 h-3 shrink-0" />}
                         </button>
                       );
                     })}

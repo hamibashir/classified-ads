@@ -59,20 +59,30 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ images = [], title }
     <>
       <div className="w-full space-y-3">
         {/* Main Viewport */}
-        <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-xs flex items-center justify-center group">
+        <div className="relative w-full h-[320px] sm:h-[420px] md:h-[480px] lg:h-[500px] rounded-2xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-sm flex items-center justify-center group select-none">
           {validImages.length > 0 && currentImage && !imgErrors[activeIndex] ? (
             <div
-              className="w-full h-full relative cursor-zoom-in"
+              className="w-full h-full relative flex items-center justify-center cursor-zoom-in overflow-hidden"
               onClick={() => setIsLightboxOpen(true)}
             >
+              {/* Ambient blurred backdrop so any aspect ratio fills cleanly without blank gaps */}
+              <img
+                src={currentImage.url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
+              />
+
+              {/* Main adjusted showcase image */}
               <img
                 src={currentImage.url}
                 alt={`${title} - Photo ${activeIndex + 1}`}
-                className="w-full h-full object-contain sm:object-cover select-none transition-all duration-300 group-hover:scale-101"
+                className="relative z-[1] max-w-full max-h-full w-full h-full object-contain select-none transition-transform duration-300 group-hover:scale-[1.02]"
                 onError={() => handleImageError(activeIndex)}
               />
+
               {/* Click to Enlarge Overlay Pill */}
-              <div className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 shadow-md">
+              <div className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 shadow-md">
                 <Maximize2 className="w-3.5 h-3.5" />
                 <span>Click to expand</span>
               </div>
@@ -90,7 +100,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ images = [], title }
 
           {/* Counter Pill */}
           {validImages.length > 0 && (
-            <div className="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10 pointer-events-none">
+            <div className="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10 pointer-events-none">
               <ImageIcon className="w-3 h-3 text-teal-400" />
               <span>
                 {activeIndex + 1} / {validImages.length}
@@ -139,9 +149,9 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ images = [], title }
                   key={img.id || idx}
                   type="button"
                   onClick={() => setActiveIndex(idx)}
-                  className={`relative w-20 h-16 sm:w-24 sm:h-18 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                  className={`relative w-20 h-16 sm:w-24 sm:h-[72px] flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
                     isSelected
-                      ? 'border-teal-600 ring-2 ring-teal-600/30 shadow-xs scale-102'
+                      ? 'border-teal-600 ring-2 ring-teal-600/30 shadow-sm scale-[1.02]'
                       : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
                   }`}
                 >

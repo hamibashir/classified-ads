@@ -281,7 +281,9 @@ export const getAds = async (
     }
 
     if (city) {
-      where.locationCity = { equals: city };
+      const cityClean = String(city).trim();
+      const capitalized = cityClean.charAt(0).toUpperCase() + cityClean.slice(1).toLowerCase();
+      where.locationCity = { in: [cityClean, capitalized, cityClean.toLowerCase(), cityClean.toUpperCase()] };
     }
 
     if (minPrice !== undefined || maxPrice !== undefined) {
@@ -296,9 +298,52 @@ export const getAds = async (
     }
 
     if (searchTerm) {
+      const rawSearch = String(searchTerm).trim();
+      const stripped = rawSearch.toLowerCase().replace(/[\s\-_]+/g, '');
+      const tokens = rawSearch.split(/\s+/).filter(Boolean);
+
+      // 1. Query IDs using space-free SQL to seamlessly ignore spacing differences (e.g. "iphone15" vs "iphone 15", "hondacivic" vs "honda civic", "altovxr" vs "alto vxr")
+      let spaceMatchedIds: string[] = [];
+      if (stripped.length >= 2) {
+        try {
+          const rawMatches = await prisma.$queryRaw<Array<{ id: string }>>`
+            SELECT a.id FROM ads a
+            WHERE a.status = 'ACTIVE'
+              AND (
+                REPLACE(REPLACE(a.title, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+                OR REPLACE(REPLACE(a.description, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+                OR REPLACE(REPLACE(a.slug, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+              )
+            LIMIT 50;
+          `;
+          spaceMatchedIds = rawMatches.map((r) => r.id);
+        } catch {
+          // Fallback if query fails
+        }
+      }
+
+      // 2. Combine space-stripped ID matches and multi-token keyword conditions
+      const tokenConditions = tokens.map((token) => ({
+        OR: [
+          { title: { contains: token } },
+          { description: { contains: token } },
+          { slug: { contains: token } },
+        ],
+      }));
+
       where.OR = [
-        { title: { contains: searchTerm } },
-        { description: { contains: searchTerm } },
+        ...(spaceMatchedIds.length > 0 ? [{ id: { in: spaceMatchedIds } }] : []),
+        ...(tokens.length === 1
+          ? [
+              { title: { contains: tokens[0] } },
+              { description: { contains: tokens[0] } },
+              { slug: { contains: tokens[0] } },
+            ]
+          : [
+              {
+                AND: tokenConditions,
+              },
+            ]),
       ];
     }
 
@@ -457,6 +502,27 @@ export const getAdBySlug = async (
     };
 
     sendSuccess(res, formattedAd, 'Ad details retrieved successfully', 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Record view on an ad by ID
+ * POST /api/v1/ads/:id/view
+ */
+export const recordAdView = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await prisma.ad.updateMany({
+      where: { id },
+      data: { viewsCount: { increment: 1 } },
+    });
+    sendSuccess(res, { id }, 'Ad view recorded successfully', 200);
   } catch (error) {
     next(error);
   }

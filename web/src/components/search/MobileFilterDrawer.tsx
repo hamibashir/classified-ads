@@ -12,8 +12,9 @@ interface MobileFilterDrawerProps {
   minPrice?: string;
   maxPrice?: string;
   condition?: string;
-  onCategoryChange: (slug: string) => void;
+  onCategoryChange?: (slug: string) => void;
   onSubcategoryChange?: (subcatSlug: string) => void;
+  onCategorySelect?: (categorySlug: string, subcategorySlug?: string | null) => void;
   onCityChange: (cityId: string) => void;
   onPriceChange: (min: string, max: string) => void;
   onConditionChange: (condition: string) => void;

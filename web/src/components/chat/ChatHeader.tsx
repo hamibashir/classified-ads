@@ -12,7 +12,7 @@ import {
 
 interface ChatHeaderProps {
   ad: ChatAdSummary;
-  otherUser: ChatUser;
+  otherUser?: ChatUser;
   isOnline?: boolean;
   isTyping?: boolean;
   onBack?: () => void;
@@ -21,7 +21,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({
   ad,
-  otherUser,
+  otherUser = { id: 'seller', name: 'Seller' },
   isOnline = true,
   isTyping = false,
   onBack,
@@ -31,6 +31,8 @@ export function ChatHeader({
     ad.images && ad.images.length > 0
       ? ad.images[0].url
       : 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&q=80&w=200';
+
+  const sellerName = otherUser?.name || 'Seller';
 
   return (
     <div className="border-b border-border bg-card/80 backdrop-blur-xs px-4 py-3 shrink-0 flex items-center justify-between gap-3">
@@ -50,16 +52,16 @@ export function ChatHeader({
 
         <div className="relative shrink-0">
           <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center border border-border">
-            {otherUser.avatarUrl ? (
+            {otherUser?.avatarUrl ? (
               <Image
                 src={otherUser.avatarUrl}
-                alt={otherUser.name}
+                alt={sellerName}
                 width={40}
                 height={40}
                 className="rounded-full object-cover"
               />
             ) : (
-              otherUser.name.slice(0, 1).toUpperCase()
+              sellerName.slice(0, 1).toUpperCase()
             )}
           </div>
           <span
@@ -71,7 +73,7 @@ export function ChatHeader({
 
         <div className="min-w-0">
           <h2 className="font-bold text-sm sm:text-base text-foreground truncate flex items-center gap-1.5">
-            <span>{otherUser.name}</span>
+            <span>{sellerName}</span>
           </h2>
           <div className="text-[11px] text-muted-foreground flex items-center gap-1">
             {isTyping ? (
@@ -107,7 +109,7 @@ export function ChatHeader({
         <div className="flex items-center gap-1 shrink-0">
           <a
             href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-              `Regarding "${ad.title}" (${formatPKR(ad.price)}) on Classified Ads PK`
+              `Regarding "${ad.title}" (${formatPKR(ad.price)}) on Zaaz B`
             )}`}
             target="_blank"
             rel="noopener noreferrer"

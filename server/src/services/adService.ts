@@ -93,9 +93,33 @@ export const findNearbyAds = async (
     ? Prisma.sql`AND a.categoryId = ${options.categoryId}`
     : Prisma.empty;
 
-  const searchFilter = options.search
-    ? Prisma.sql`AND (a.title LIKE ${`%${options.search}%`} OR a.description LIKE ${`%${options.search}%`})`
-    : Prisma.empty;
+  let searchFilter = Prisma.empty;
+  if (options.search) {
+    const rawSearch = options.search.trim();
+    const stripped = rawSearch.toLowerCase().replace(/[\s\-_]+/g, '');
+    const tokens = rawSearch.split(/\s+/).filter(Boolean);
+
+    const spaceCondition = stripped.length >= 2
+      ? Prisma.sql`(
+          REPLACE(REPLACE(a.title, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+          OR REPLACE(REPLACE(a.description, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+          OR REPLACE(REPLACE(a.slug, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+        )`
+      : Prisma.empty;
+
+    const tokenConditions = tokens.map(
+      (t) => Prisma.sql`(a.title LIKE ${`%${t}%`} OR a.description LIKE ${`%${t}%`})`
+    );
+    const andTokenCondition = tokenConditions.length > 0 ? Prisma.sql`(${Prisma.join(tokenConditions, ' AND ')})` : Prisma.empty;
+
+    if (spaceCondition !== Prisma.empty && andTokenCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND (${spaceCondition} OR ${andTokenCondition})`;
+    } else if (spaceCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND ${spaceCondition}`;
+    } else if (andTokenCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND ${andTokenCondition}`;
+    }
+  }
 
   const cityFilter = options.city
     ? Prisma.sql`AND a.locationCity = ${options.city}`
@@ -235,9 +259,33 @@ export const countNearbyAds = async (
     ? Prisma.sql`AND a.categoryId = ${options.categoryId}`
     : Prisma.empty;
 
-  const searchFilter = options.search
-    ? Prisma.sql`AND (a.title LIKE ${`%${options.search}%`} OR a.description LIKE ${`%${options.search}%`})`
-    : Prisma.empty;
+  let searchFilter = Prisma.empty;
+  if (options.search) {
+    const rawSearch = options.search.trim();
+    const stripped = rawSearch.toLowerCase().replace(/[\s\-_]+/g, '');
+    const tokens = rawSearch.split(/\s+/).filter(Boolean);
+
+    const spaceCondition = stripped.length >= 2
+      ? Prisma.sql`(
+          REPLACE(REPLACE(a.title, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+          OR REPLACE(REPLACE(a.description, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+          OR REPLACE(REPLACE(a.slug, ' ', ''), '-', '') LIKE ${`%${stripped}%`}
+        )`
+      : Prisma.empty;
+
+    const tokenConditions = tokens.map(
+      (t) => Prisma.sql`(a.title LIKE ${`%${t}%`} OR a.description LIKE ${`%${t}%`})`
+    );
+    const andTokenCondition = tokenConditions.length > 0 ? Prisma.sql`(${Prisma.join(tokenConditions, ' AND ')})` : Prisma.empty;
+
+    if (spaceCondition !== Prisma.empty && andTokenCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND (${spaceCondition} OR ${andTokenCondition})`;
+    } else if (spaceCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND ${spaceCondition}`;
+    } else if (andTokenCondition !== Prisma.empty) {
+      searchFilter = Prisma.sql`AND ${andTokenCondition}`;
+    }
+  }
 
   const cityFilter = options.city
     ? Prisma.sql`AND a.locationCity = ${options.city}`

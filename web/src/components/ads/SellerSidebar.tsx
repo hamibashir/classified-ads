@@ -177,20 +177,20 @@ export const SellerSidebar: React.FC<SellerSidebarProps> = ({
     setIsStartingChat(true);
     setChatError(null);
 
-    try {
-      const res = await apiClient.post<{
-        conversation: { id: string };
-      }>('/chat/conversations', { adId: ad.id });
+    const queryFallback = `/chat?adId=${encodeURIComponent(ad.id)}&adTitle=${encodeURIComponent(ad.title)}&adPrice=${ad.price}&adSlug=${encodeURIComponent(ad.slug)}&sellerId=${encodeURIComponent(seller?.id || '')}&sellerName=${encodeURIComponent(sellerName)}`;
 
-      const convId = res.data?.conversation?.id;
+    try {
+      const res = await apiClient.post<{ id?: string; conversation?: { id: string } }>('/chat/conversations', { adId: ad.id });
+
+      const convId = res.data?.id || res.data?.conversation?.id;
       if (convId) {
-        router.push(`/chat?conversationId=${convId}`);
+        router.push(`/chat?conversationId=${convId}&adId=${encodeURIComponent(ad.id)}`);
       } else {
-        router.push('/chat');
+        router.push(queryFallback);
       }
     } catch {
-      // If endpoint doesn't exist yet or mock, navigate to chat
-      router.push(`/chat?adId=${encodeURIComponent(ad.id)}`);
+      // If endpoint doesn't exist yet or mock ad, navigate to chat with listing details
+      router.push(queryFallback);
     } finally {
       setIsStartingChat(false);
     }

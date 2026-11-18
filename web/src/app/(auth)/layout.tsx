@@ -22,22 +22,23 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Classified Ads PK
+            Zaaz B
           </span>
         </div>
 
         {/* Brand Header */}
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-lg shadow-sm shadow-primary/25">
-              PK
+          <Link href="/" className="inline-flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-sm shadow-sm">
+              ZB
             </div>
             <div className="text-left">
-              <span className="text-xl font-bold tracking-tight text-foreground block leading-none">
-                Classified<span className="text-primary font-black">Ads</span>
+              <span className="text-xl font-bold tracking-tight text-foreground block leading-none flex items-center gap-1">
+                <span>Zaaz</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-black">B</span>
               </span>
-              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block mt-0.5">
-                Pakistan Marketplace
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider block mt-0.5">
+                Premier Marketplace
               </span>
             </div>
           </Link>

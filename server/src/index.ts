@@ -75,7 +75,7 @@ app.get('/api/v1/health', (_req: Request, res: Response) => {
       environment: process.env.NODE_ENV || 'development',
       database: dbStatus.isConnected ? 'connected' : 'disconnected'
     },
-    'Classified Ads PK API is operational',
+    'Zaaz B API is operational',
     200,
     { status: 'healthy' }
   );
@@ -129,17 +129,24 @@ const io = initSocketServer(httpServer);
 let serverInstance: http.Server | null = null;
 
 if (process.env.NODE_ENV !== 'test') {
-  // Initialize Database Connection
-  connectDB().catch((err) => {
-    console.warn('[Database] Initial connection error caught:', err);
-  });
+  const startServer = async () => {
+    // 1. Initialize and ensure Database Connection before accepting traffic
+    try {
+      await connectDB();
+    } catch (err) {
+      console.warn('[Database] Initial connection error caught:', err);
+    }
 
-  serverInstance = httpServer.listen(PORT, () => {
-    console.log(`[Classified Ads PK API] Server running on port ${PORT}`);
-    console.log(`[Environment] ${process.env.NODE_ENV || 'development'}`);
-    console.log(`[Health Check] http://localhost:${PORT}/api/v1/health`);
-    console.log(`[Socket.IO] Real-time engine ready on port ${PORT}`);
-  });
+    // 2. Start HTTP & WebSocket listener
+    serverInstance = httpServer.listen(PORT, () => {
+      console.log(`[Zaaz B API] Server running on port ${PORT}`);
+      console.log(`[Environment] ${process.env.NODE_ENV || 'development'}`);
+      console.log(`[Health Check] http://localhost:${PORT}/api/v1/health`);
+      console.log(`[Socket.IO] Real-time engine ready on port ${PORT}`);
+    });
+  };
+
+  startServer();
 
   // Graceful Shutdown
   const handleShutdown = async (signal: string) => {

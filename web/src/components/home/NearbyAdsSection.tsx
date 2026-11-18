@@ -3,11 +3,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  MapPin,
   Crosshair,
   ArrowRight,
   RefreshCw,
-  Sparkles,
 } from 'lucide-react';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { calculateDistanceKm } from '@/lib/geo-utils';
@@ -203,7 +201,7 @@ export const NearbyAdsSection: React.FC = () => {
     };
   }, [coordinates, selectedCity]);
 
-  const fetchNearbyAds = useCallback(async () => {
+  const fetchNearbyAds = useCallback(async (retryCount = 0) => {
     setLoading(true);
     try {
       // Attempt backend API fetch
@@ -234,10 +232,41 @@ export const NearbyAdsSection: React.FC = () => {
           return item;
         });
         setAds(enriched);
+        setLoading(false);
+        return;
       } else {
         throw new Error('Empty backend list');
       }
-    } catch {
+    } catch (err: unknown) {
+      // Automatic recovery: if backend is still starting up during dev/cold boot, retry
+      const isNetworkErr =
+        err &&
+        typeof err === 'object' &&
+        (('code' in err && (err as { code?: string }).code === 'NETWORK_ERROR') ||
+          ('status' in err && (err as { status?: number }).status === 0));
+
+      if (isNetworkErr && retryCount < 3) {
+        // Populate fallback immediately so screen is never blank
+        const enrichedFallback = FALLBACK_NEARBY_ADS.map((item) => {
+          const dist = calculateDistanceKm(activeAnchor, {
+            latitude: item.latitude!,
+            longitude: item.longitude!,
+          });
+          return {
+            ...item,
+            distanceKm: Math.round(dist * 10) / 10,
+          };
+        }).sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+        setAds(enrichedFallback);
+        setLoading(false);
+
+        // Schedule auto-retry once backend has completed startup
+        setTimeout(() => {
+          fetchNearbyAds(retryCount + 1);
+        }, 1500 * (retryCount + 1));
+        return;
+      }
+
       // Graceful fallback with distance enrichment
       const enrichedFallback = FALLBACK_NEARBY_ADS.map((item) => {
         const dist = calculateDistanceKm(activeAnchor, {

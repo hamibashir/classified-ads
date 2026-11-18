@@ -25,8 +25,8 @@ export function ConversationList({
 
     return conversations.filter(
       (c) =>
-        c.ad.title.toLowerCase().includes(q) ||
-        c.otherUser.name.toLowerCase().includes(q) ||
+        (c.ad?.title && c.ad.title.toLowerCase().includes(q)) ||
+        (c.otherUser?.name && c.otherUser.name.toLowerCase().includes(q)) ||
         (c.lastMessage && c.lastMessage.text.toLowerCase().includes(q))
     );
   }, [conversations, searchQuery]);

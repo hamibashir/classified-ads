@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api-client';
@@ -8,8 +8,6 @@ import { useChatSocket } from '@/hooks/useChatSocket';
 import {
   ChatConversation,
   ChatMessage,
-  ConversationListApiResponse,
-  MessageHistoryApiResponse,
 } from '@/types/chat';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { ChatHeader } from '@/components/chat/ChatHeader';
@@ -36,7 +34,10 @@ function ChatContent() {
   // Mobile navigation state
   const [isMobileThreadOpen, setIsMobileThreadOpen] = useState<boolean>(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const hasResolvedAdRef = useRef<string | null>(null);
+  const selectedConversationRef = useRef<ChatConversation | null>(selectedConversation);
+  selectedConversationRef.current = selectedConversation;
 
   // 1. Auth Guard
   useEffect(() => {
@@ -48,9 +49,10 @@ function ChatContent() {
   // 2. Socket.IO integration
   const handleIncomingMessage = useCallback(
     (newMsg: ChatMessage) => {
+      const activeConv = selectedConversationRef.current;
       // Append to active message thread if conversation matches
       setMessages((prev) => {
-        if (selectedConversation && newMsg.conversationId === selectedConversation.id) {
+        if (activeConv && newMsg.conversationId === activeConv.id) {
           if (prev.some((m) => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         }
@@ -71,7 +73,7 @@ function ChatContent() {
                 isRead: newMsg.isRead,
               },
               unreadCount:
-                selectedConversation?.id === newMsg.conversationId ||
+                activeConv?.id === newMsg.conversationId ||
                 newMsg.senderId === user?.id
                   ? c.unreadCount
                   : c.unreadCount + 1,
@@ -82,7 +84,7 @@ function ChatContent() {
         })
       );
     },
-    [selectedConversation, user?.id]
+    [user?.id]
   );
 
   const {
@@ -112,21 +114,39 @@ function ChatContent() {
     setIsLoadingConversations(true);
 
     try {
-      const res = await apiClient.get<ConversationListApiResponse>(
+      const res = await apiClient.get<{ conversations?: ChatConversation[] } | ChatConversation[]>(
         '/chat/conversations',
         { params: { limit: 50 } }
       );
 
-      if (res.data?.conversations) {
-        setConversations(res.data.conversations);
+      const raw = res.data;
+      const list: ChatConversation[] = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.conversations)
+        ? raw.conversations
+        : [];
 
-        // Auto-select if URL has conversationId parameter
-        if (conversationParam) {
-          const matched = res.data.conversations.find((c) => c.id === conversationParam);
-          if (matched) {
-            setSelectedConversation(matched);
-            setIsMobileThreadOpen(true);
+      setConversations(list);
+
+      // Auto-select if URL has conversationId parameter
+      if (conversationParam) {
+        let matched = list.find((c) => c.id === conversationParam);
+        if (!matched) {
+          try {
+            const singleRes = await apiClient.get<{ conversation?: ChatConversation } | ChatConversation>(`/chat/conversations/${conversationParam}`);
+            const singleData = ('conversation' in (singleRes.data || {}) ? (singleRes.data as { conversation?: ChatConversation })?.conversation : singleRes.data) as ChatConversation | undefined;
+            if (singleData?.id) {
+              matched = singleData;
+              setConversations((prev) => [singleData, ...prev.filter((c) => c.id !== singleData.id)]);
+            }
+          } catch {
+            // Silently ignore if not found
           }
+        }
+
+        if (matched) {
+          setSelectedConversation(matched);
+          setIsMobileThreadOpen(true);
         }
       }
     } catch {
@@ -140,24 +160,103 @@ function ChatContent() {
   useEffect(() => {
     async function resolveAdConversation() {
       if (!adParam || !isAuthenticated) return;
+      if (hasResolvedAdRef.current === adParam) return;
+      hasResolvedAdRef.current = adParam;
+
+      // First check if an active conversation for this ad is already in list
+      const existingInList = conversations.find(
+        (c) => c.adId === adParam || c.ad?.id === adParam
+      );
+      if (existingInList) {
+        setSelectedConversation(existingInList);
+        setIsMobileThreadOpen(true);
+        return;
+      }
 
       try {
-        const res = await apiClient.post<ChatConversation>(
+        const res = await apiClient.post<{ conversation?: ChatConversation } | ChatConversation>(
           '/chat/conversations',
           { adId: adParam }
         );
 
-        if (res.data?.id) {
-          fetchConversations();
-          router.replace(`/chat?conversationId=${res.data.id}`);
+        const conv = ('conversation' in (res.data || {}) ? (res.data as { conversation?: ChatConversation })?.conversation : res.data) as ChatConversation | undefined;
+        if (conv?.id) {
+          const isBuyer = conv.buyerId === user?.id;
+          const otherUser =
+            conv.otherUser ||
+            (isBuyer ? conv.seller : conv.buyer) || {
+              id: searchParams.get('sellerId') || 'seller',
+              name: searchParams.get('sellerName') || 'Seller',
+              avatarUrl: null,
+            };
+
+          const formattedConv: ChatConversation = {
+            ...conv,
+            otherUser,
+            ad: conv.ad || {
+              id: adParam,
+              title: searchParams.get('adTitle') || 'Classified Ad',
+              slug: searchParams.get('adSlug') || adParam,
+              price: Number(searchParams.get('adPrice') || '0'),
+              currency: 'PKR',
+              status: 'ACTIVE',
+              images: [],
+            },
+            unreadCount: conv.unreadCount ?? 0,
+            updatedAt: conv.updatedAt || new Date().toISOString(),
+          };
+
+          setSelectedConversation(formattedConv);
+          setIsMobileThreadOpen(true);
+          setConversations((prev) => [
+            formattedConv,
+            ...prev.filter((c) => c.id !== formattedConv.id),
+          ]);
+          router.replace(`/chat?conversationId=${conv.id}&adId=${encodeURIComponent(adParam)}`);
+          return;
         }
       } catch {
-        // Fall through
+        // Fallback for mock or preview ads
       }
+
+      // Fallback virtual conversation for mock / offline listings
+      const adTitle = searchParams.get('adTitle') || 'Classified Ad';
+      const adPrice = Number(searchParams.get('adPrice') || '0');
+      const adSlug = searchParams.get('adSlug') || adParam;
+      const sellerId = searchParams.get('sellerId') || 'seller-1';
+      const sellerName = searchParams.get('sellerName') || 'Seller';
+
+      const mockConv: ChatConversation = {
+        id: `virtual-${adParam}`,
+        adId: adParam,
+        ad: {
+          id: adParam,
+          title: adTitle,
+          slug: adSlug,
+          price: adPrice,
+          currency: 'PKR',
+          status: 'ACTIVE',
+          images: [],
+        },
+        buyerId: user?.id || 'me',
+        sellerId: sellerId,
+        otherUser: {
+          id: sellerId,
+          name: sellerName,
+          avatarUrl: null,
+        },
+        lastMessage: null,
+        unreadCount: 0,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setSelectedConversation(mockConv);
+      setIsMobileThreadOpen(true);
+      setConversations((prev) => [mockConv, ...prev.filter((c) => c.id !== mockConv.id)]);
     }
 
     resolveAdConversation();
-  }, [adParam, isAuthenticated, fetchConversations, router]);
+  }, [adParam, isAuthenticated, user?.id, searchParams, router, conversations]);
 
   useEffect(() => {
     fetchConversations();
@@ -170,19 +269,33 @@ function ChatContent() {
       return;
     }
 
+    // Skip network request for virtual mock threads
+    if (selectedConversation.id.startsWith('virtual-')) {
+      setMessages([]);
+      setIsLoadingMessages(false);
+      return;
+    }
+
     let isMounted = true;
     setIsLoadingMessages(true);
     joinConversation(selectedConversation.id);
 
     async function loadMessages() {
       try {
-        const res = await apiClient.get<MessageHistoryApiResponse>(
+        const res = await apiClient.get<{ messages?: ChatMessage[] } | ChatMessage[]>(
           `/chat/conversations/${selectedConversation?.id}/messages`,
           { params: { limit: 100 } }
         );
 
-        if (isMounted && res.data?.messages) {
-          setMessages(res.data.messages);
+        const raw = res.data;
+        const msgList: ChatMessage[] = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.messages)
+          ? raw.messages
+          : [];
+
+        if (isMounted) {
+          setMessages(msgList);
         }
       } catch {
         // Fallback
@@ -201,10 +314,49 @@ function ChatContent() {
     };
   }, [selectedConversation, joinConversation, leaveConversation]);
 
-  // Auto-scroll on new message
+  // Deduplicated messages list to prevent any duplicate rendering
+  const displayMessages = useMemo<ChatMessage[]>(() => {
+    const seen = new Set<string>();
+    return messages.filter((msg: ChatMessage) => {
+      if (seen.has(msg.id)) return false;
+      seen.add(msg.id);
+      return true;
+    });
+  }, [messages]);
+
+  // Scroll ONLY the message feed container - NEVER the document/window
+  const scrollToBottom = useCallback((smooth = false) => {
+    if (!messageContainerRef.current) return;
+    const container = messageContainerRef.current;
+    if (smooth) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
+    } else {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, []);
+
+  // When switching conversation or upon initial messages load: snap chat box to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    if (selectedConversation && messages.length > 0) {
+      requestAnimationFrame(() => {
+        scrollToBottom(false);
+      });
+    }
+  }, [selectedConversation?.id, scrollToBottom]);
+
+  // When a new message is appended or user is typing: smoothly scroll chat box to bottom
+  const prevMessagesCountRef = useRef(messages.length);
+  useEffect(() => {
+    if (messages.length > prevMessagesCountRef.current || isTyping) {
+      requestAnimationFrame(() => {
+        scrollToBottom(true);
+      });
+    }
+    prevMessagesCountRef.current = messages.length;
+  }, [messages.length, isTyping, scrollToBottom]);
 
   // 5. Send Message handler
   const handleSendMessage = async (text: string): Promise<boolean> => {
@@ -213,7 +365,10 @@ function ChatContent() {
     // Try Socket.IO first
     const socketResult = await socketSendMessage(selectedConversation.id, text);
     if (socketResult) {
-      setMessages((prev) => [...prev, socketResult]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === socketResult.id)) return prev;
+        return [...prev, socketResult];
+      });
       return true;
     }
 
@@ -226,7 +381,10 @@ function ChatContent() {
       isRead: false,
       createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, optimisticMessage]);
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === optimisticMessage.id)) return prev;
+      return [...prev, optimisticMessage];
+    });
     return true;
   };
 
@@ -248,7 +406,7 @@ function ChatContent() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="container max-w-7xl mx-auto py-4 sm:py-6 px-2 sm:px-4 h-[calc(100vh-80px)] min-h-[550px] max-h-[850px]">
+    <div className="container max-w-7xl mx-auto py-2 sm:py-4 px-2 sm:px-4 h-[calc(100vh-80px)] min-h-[550px] max-h-[850px]">
       <div className="bg-card border border-border rounded-2xl overflow-hidden h-full flex shadow-sm">
         {/* Left Pane: Conversation List */}
         <div
@@ -293,12 +451,15 @@ function ChatContent() {
               </div>
 
               {/* Message Feed */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
+              <div
+                ref={messageContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin overscroll-contain"
+              >
                 {isLoadingMessages ? (
                   <div className="h-full flex items-center justify-center">
                     <Loader2 className="w-6 h-6 text-primary animate-spin" />
                   </div>
-                ) : messages.length === 0 ? (
+                ) : displayMessages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-6 text-muted-foreground space-y-2">
                     <p className="text-xs font-semibold">Start the conversation</p>
                     <p className="text-[11px] max-w-xs">
@@ -306,7 +467,7 @@ function ChatContent() {
                     </p>
                   </div>
                 ) : (
-                  messages.map((msg) => (
+                  displayMessages.map((msg) => (
                     <MessageBubble
                       key={msg.id}
                       message={msg}
@@ -322,12 +483,10 @@ function ChatContent() {
                     <span className="w-2 h-2 rounded-full bg-primary/70 animate-bounce [animation-delay:0.2s]" />
                     <span className="w-2 h-2 rounded-full bg-primary/70 animate-bounce [animation-delay:0.4s]" />
                     <span className="text-[11px] font-medium ml-1">
-                      {selectedConversation.otherUser.name} is typing...
+                      {selectedConversation.otherUser?.name || 'User'} is typing...
                     </span>
                   </div>
                 )}
-
-                <div ref={messagesEndRef} />
               </div>
 
               {/* Message Compose Bar */}

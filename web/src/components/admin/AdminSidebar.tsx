@@ -78,12 +78,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen = false, onCl
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800 flex items-center justify-between">
         <Link href="/admin" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm shadow-sm shadow-primary/30">
-            PK
+          <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-white font-black text-xs shadow-sm">
+            ZB
           </div>
           <div>
-            <div className="font-bold text-sm text-white tracking-tight flex items-center gap-1.5">
-              Classified Ads <span className="text-primary font-black">PK</span>
+            <div className="font-bold text-sm text-white tracking-tight flex items-center gap-1">
+              <span>Zaaz</span> <span className="text-emerald-400 font-black">B</span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

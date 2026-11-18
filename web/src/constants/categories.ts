@@ -69,6 +69,12 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-amber-600',
     bgTint: 'bg-amber-50 group-hover:bg-amber-100 border-amber-200',
     description: 'Honda 70, 125, heavy bikes, scooters & electric bikes',
+    subcategories: [
+      { id: 'sub-motorcycles', name: 'Motorcycles', slug: 'motorcycles', order: 1 },
+      { id: 'sub-heavy-bikes', name: 'Heavy & Sports Bikes', slug: 'heavy-bikes', order: 2 },
+      { id: 'sub-scooters', name: 'Scooters & Scooties', slug: 'scooters-electric', order: 3 },
+      { id: 'sub-bike-parts', name: 'Helmets & Accessories', slug: 'bike-accessories', order: 4 },
+    ],
   },
   {
     id: 'cat-jobs',
@@ -81,6 +87,7 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     subcategories: [
       { id: 'sub-it', name: 'IT & Software', slug: 'it-software', order: 1 },
       { id: 'sub-sales', name: 'Sales & Marketing', slug: 'sales-marketing', order: 2 },
+      { id: 'sub-customer-support', name: 'Customer Support', slug: 'customer-support', order: 3 },
     ],
   },
   {
@@ -94,6 +101,7 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     subcategories: [
       { id: 'sub-repairs', name: 'Home Repair', slug: 'home-repair', order: 1 },
       { id: 'sub-movers', name: 'Packers & Movers', slug: 'packers-movers', order: 2 },
+      { id: 'sub-web-dev', name: 'Web & IT Services', slug: 'web-services', order: 3 },
     ],
   },
   {
@@ -104,6 +112,12 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-rose-600',
     bgTint: 'bg-rose-50 group-hover:bg-rose-100 border-rose-200',
     description: "Men's, women's apparel, watches & luxury perfumes",
+    subcategories: [
+      { id: 'sub-mens-fashion', name: "Men's Fashion", slug: 'mens-fashion', order: 1 },
+      { id: 'sub-womens-fashion', name: "Women's Fashion", slug: 'womens-fashion', order: 2 },
+      { id: 'sub-watches', name: 'Watches & Accessories', slug: 'watches-accessories', order: 3 },
+      { id: 'sub-jewelry', name: 'Jewelry & Perfumes', slug: 'jewelry-perfumes', order: 4 },
+    ],
   },
   {
     id: 'cat-furniture',
@@ -113,6 +127,12 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-yellow-700',
     bgTint: 'bg-yellow-50 group-hover:bg-yellow-100 border-yellow-200',
     description: 'Sofas, bed sets, dining tables & interior decor',
+    subcategories: [
+      { id: 'sub-sofas', name: 'Sofa & Chairs', slug: 'sofa-chairs', order: 1 },
+      { id: 'sub-beds', name: 'Beds & Wardrobes', slug: 'beds-wardrobes', order: 2 },
+      { id: 'sub-tables', name: 'Tables & Dining Sets', slug: 'tables-dining', order: 3 },
+      { id: 'sub-decor', name: 'Home Decor & Rugs', slug: 'home-decor', order: 4 },
+    ],
   },
   {
     id: 'cat-animals',
@@ -122,6 +142,12 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-lime-700',
     bgTint: 'bg-lime-50 group-hover:bg-lime-100 border-lime-200',
     description: 'Birds, goats, cattle, cats, dogs & pet accessories',
+    subcategories: [
+      { id: 'sub-birds', name: 'Birds & Parrots', slug: 'birds', order: 1 },
+      { id: 'sub-cats-dogs', name: 'Cats & Dogs', slug: 'cats-dogs', order: 2 },
+      { id: 'sub-livestock', name: 'Livestock & Cattle', slug: 'livestock', order: 3 },
+      { id: 'sub-pet-acc', name: 'Pet Food & Accessories', slug: 'pet-accessories', order: 4 },
+    ],
   },
   {
     id: 'cat-hobbies',
@@ -131,6 +157,12 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-cyan-600',
     bgTint: 'bg-cyan-50 group-hover:bg-cyan-100 border-cyan-200',
     description: 'Gym equipment, sports gear, books & musical instruments',
+    subcategories: [
+      { id: 'sub-gym', name: 'Gym & Fitness', slug: 'gym-fitness', order: 1 },
+      { id: 'sub-sports-eq', name: 'Sports Equipment', slug: 'sports-equipment', order: 2 },
+      { id: 'sub-instruments', name: 'Musical Instruments', slug: 'musical-instruments', order: 3 },
+      { id: 'sub-books', name: 'Books & Magazines', slug: 'books-magazines', order: 4 },
+    ],
   },
   {
     id: 'cat-kids',
@@ -140,5 +172,11 @@ export const POPULAR_CATEGORIES: CategoryItem[] = [
     color: 'text-pink-600',
     bgTint: 'bg-pink-50 group-hover:bg-pink-100 border-pink-200',
     description: 'Prams, strollers, toys, kids clothing & baby gear',
+    subcategories: [
+      { id: 'sub-prams', name: 'Prams & Strollers', slug: 'prams-strollers', order: 1 },
+      { id: 'sub-toys', name: 'Toys & Ride-ons', slug: 'toys-games', order: 2 },
+      { id: 'sub-kids-clothes', name: 'Kids Clothing', slug: 'kids-clothing', order: 3 },
+      { id: 'sub-baby-gear', name: 'Baby Gear & Cots', slug: 'baby-gear', order: 4 },
+    ],
   },
 ];

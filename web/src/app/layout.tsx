@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Classified Ads PK - Pakistan's #1 Local Marketplace",
+  title: "Zaaz B - Pakistan's Premier Verified Marketplace",
   description:
-    "Buy and sell vehicles, electronics, mobile phones, real estate, and goods across all Pakistani cities with real-time chat and direct contact.",
+    "Buy and sell luxury vehicles, mobile devices, electronics, premium real estate, and goods across Pakistan with real-time in-app chat and verified seller protection on Zaaz B.",
 };
 
 export default function RootLayout({

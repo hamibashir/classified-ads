@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createConversation,
   getConversations,
+  getConversationById,
   getMessages,
 } from '../controllers/chatController';
 import { authenticateUser } from '../middleware/auth';
@@ -38,6 +39,17 @@ router.get(
   '/conversations',
   validateRequest({ query: conversationListQuerySchema }),
   getConversations
+);
+
+/**
+ * @route   GET /api/v1/chat/conversations/:id
+ * @desc    Retrieve a single conversation thread by ID
+ * @access  Protected (Requires Bearer token)
+ */
+router.get(
+  '/conversations/:id',
+  validateRequest({ params: conversationIdParamSchema }),
+  getConversationById
 );
 
 /**

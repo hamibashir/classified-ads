@@ -291,7 +291,7 @@ function LoginFormContent() {
 
       {/* Register Link Switch */}
       <div className="pt-2 text-center text-xs text-muted-foreground border-t border-border/70">
-        New to Classified Ads PK?{' '}
+        New to Zaaz B?{' '}
         <Link
           href={`/register${rawRedirect ? `?redirect=${encodeURIComponent(rawRedirect)}` : ''}`}
           className="font-semibold text-primary hover:underline ml-1"

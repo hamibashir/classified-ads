@@ -56,7 +56,7 @@ export function ConversationItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-1 mb-0.5">
           <span className="font-bold text-xs sm:text-sm text-foreground truncate">
-            {conversation.otherUser.name}
+            {conversation.otherUser?.name || 'Seller'}
           </span>
           <span className="text-[10px] text-muted-foreground shrink-0 font-mono">
             {formattedDate}
@@ -64,7 +64,7 @@ export function ConversationItem({
         </div>
 
         <p className="text-xs font-semibold text-primary/90 truncate mb-1">
-          {conversation.ad.title} • {formatPKR(conversation.ad.price)}
+          {conversation.ad?.title || 'Classified Ad'} • {formatPKR(conversation.ad?.price || 0)}
         </p>
 
         <div className="flex items-center justify-between gap-2">

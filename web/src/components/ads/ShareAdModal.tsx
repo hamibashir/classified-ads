@@ -32,9 +32,9 @@ export const ShareAdModal: React.FC<ShareAdModalProps> = ({
 
   const currentUrl =
     adUrl ||
-    (typeof window !== 'undefined' ? window.location.href : 'https://classifiedads.pk');
+    (typeof window !== 'undefined' ? window.location.href : 'https://zaazb.com');
 
-  const shareText = `Check out "${adTitle}" for ${formatPKR(adPrice)} on Classified Ads PK:\n${currentUrl}`;
+  const shareText = `Check out "${adTitle}" for ${formatPKR(adPrice)} on Zaaz B:\n${currentUrl}`;
 
   const handleCopyLink = async () => {
     try {
@@ -61,7 +61,7 @@ export const ShareAdModal: React.FC<ShareAdModalProps> = ({
   };
 
   const handleTwitterShare = () => {
-    const text = encodeURIComponent(`Check out "${adTitle}" on Classified Ads PK`);
+    const text = encodeURIComponent(`Check out "${adTitle}" on Zaaz B`);
     const url = encodeURIComponent(currentUrl);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };

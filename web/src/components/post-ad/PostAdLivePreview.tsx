@@ -43,7 +43,7 @@ export const PostAdLivePreview: React.FC<PostAdLivePreviewProps> = ({
       {/* Realistic Card Simulation */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden transition-all duration-300">
         {/* Cover Photo */}
-        <div className="relative aspect-4/3 w-full bg-slate-900 flex items-center justify-center overflow-hidden group">
+        <div className="relative aspect-[4/3] w-full bg-slate-900 flex items-center justify-center overflow-hidden group">
           {coverImage ? (
             <img
               src={coverImage.url}
@@ -159,7 +159,7 @@ export const PostAdLivePreview: React.FC<PostAdLivePreviewProps> = ({
           <span>Quick Tip for Sellers</span>
         </div>
         <p className="text-[11px] leading-relaxed text-teal-800">
-          Ads with 3+ clear photos and realistic PKR pricing sell up to 4x faster on Classified Ads PK.
+          Ads with 3+ clear photos and realistic PKR pricing sell up to 4x faster on Zaaz B.
         </p>
       </div>
     </div>

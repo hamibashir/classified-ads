@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   MapPin,
   Clock,
@@ -9,6 +9,20 @@ import {
   CheckCircle2,
   Share2,
   Heart,
+  Sparkles,
+  Layers,
+  Calendar,
+  ShieldCheck,
+  Cpu,
+  Car,
+  Smartphone,
+  Wrench,
+  Info,
+  FileText,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { AdListItem } from '@/types/ad';
 import { formatPKR, formatRelativeTime } from '@/lib/formatters';
@@ -21,9 +35,286 @@ interface AdOverviewProps {
   onFavoriteToggle?: (isFavorited: boolean) => void;
 }
 
+interface SpecItem {
+  label: string;
+  value: string;
+  icon: React.ElementType;
+}
+
+/**
+ * Derives clean, high-value listing specifications without developer clutter (e.g. UUIDs).
+ */
+function extractListingSpecs(ad: AdListItem): SpecItem[] {
+  const specs: SpecItem[] = [];
+
+  // 1. Condition
+  const conditionLabels: Record<string, string> = {
+    NEW: 'Brand New (Sealed)',
+    LIKE_NEW: 'Like New (10/10)',
+    USED_GOOD: 'Gently Used (Good)',
+    USED_FAIR: 'Fair Condition',
+    USED: 'Pre-Owned / Used',
+  };
+  specs.push({
+    label: 'Condition',
+    value: conditionLabels[ad.condition] || 'Pre-Owned',
+    icon: Sparkles,
+  });
+
+  // 2. Category
+  if (ad.category?.name) {
+    specs.push({
+      label: 'Category',
+      value: ad.category.name,
+      icon: Layers,
+    });
+  }
+
+  // 3. Location (Clean combined)
+  const locationText = ad.locationAddress
+    ? `${ad.locationAddress}, ${ad.locationCity}`
+    : ad.locationCity || 'Pakistan';
+  specs.push({
+    label: 'Location',
+    value: locationText,
+    icon: MapPin,
+  });
+
+  const fullText = `${ad.title} ${ad.description || ''}`;
+
+  // 4. Detected Brand / Make
+  const knownBrands = [
+    'Toyota', 'Honda', 'Suzuki', 'Hyundai', 'Kia', 'Changan', 'Nissan', 'Daihatsu', 'Audi', 'BMW', 'Mercedes',
+    'Apple', 'Samsung', 'Xiaomi', 'Redmi', 'Infinix', 'Tecno', 'Oppo', 'Vivo', 'Realme', 'OnePlus', 'Google Pixel',
+    'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MacBook', 'Sony', 'Canon', 'Nikon',
+    'Haier', 'Gree', 'Dawlance', 'Pel', 'Waves', 'Kenwood', 'Orient'
+  ];
+  const matchedBrand = knownBrands.find((b) =>
+    new RegExp(`\\b${b}\\b`, 'i').test(fullText)
+  );
+  if (matchedBrand) {
+    const isVehicle =
+      (ad.category?.slug || '').includes('motor') ||
+      (ad.category?.slug || '').includes('vehicle') ||
+      (ad.category?.slug || '').includes('car');
+    specs.push({
+      label: isVehicle ? 'Make / Brand' : 'Brand',
+      value: matchedBrand,
+      icon: isVehicle ? Car : Smartphone,
+    });
+  }
+
+  // 5. Model Year (e.g. 1990 - 2026)
+  const yearMatch = fullText.match(/\b(199\d|20[0-2]\d)\b/);
+  if (yearMatch) {
+    specs.push({
+      label: 'Model / Year',
+      value: yearMatch[1],
+      icon: Calendar,
+    });
+  }
+
+  // 6. PTA Status (for mobile phones)
+  if (/(pta\s*approved|official\s*pta)/i.test(fullText)) {
+    specs.push({
+      label: 'PTA Status',
+      value: 'PTA Approved (Official)',
+      icon: ShieldCheck,
+    });
+  } else if (/(non[- ]?pta|jv\s*sim)/i.test(fullText)) {
+    specs.push({
+      label: 'PTA Status',
+      value: 'Non-PTA / JV',
+      icon: Info,
+    });
+  }
+
+  // 7. Fuel / Transmission (for vehicles)
+  if (/automatic/i.test(fullText)) {
+    specs.push({
+      label: 'Transmission',
+      value: 'Automatic',
+      icon: Wrench,
+    });
+  } else if (/manual/i.test(fullText)) {
+    specs.push({
+      label: 'Transmission',
+      value: 'Manual',
+      icon: Wrench,
+    });
+  }
+
+  // 8. Storage / RAM (for electronics / phones)
+  const storageMatch = fullText.match(/\b(64|128|256|512)\s*GB\b/i) || fullText.match(/\b(1|2)\s*TB\b/i);
+  if (storageMatch) {
+    specs.push({
+      label: 'Storage',
+      value: storageMatch[0].toUpperCase(),
+      icon: Cpu,
+    });
+  }
+
+  // 9. Inspection / Authenticity Guarantee
+  specs.push({
+    label: 'Verification',
+    value: 'Physical Inspection Allowed',
+    icon: CheckCircle2,
+  });
+
+  return specs;
+}
+
+/**
+ * Intelligent description renderer with bullet point formatting, copy action, and expandable reading.
+ */
+function EnhancedDescription({ description }: { description: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const lines = useMemo(() => {
+    return description.split('\n');
+  }, [description]);
+
+  const wordsCount = useMemo(() => {
+    return description.trim().split(/\s+/).filter(Boolean).length;
+  }, [description]);
+
+  const readTimeMin = Math.max(1, Math.ceil(wordsCount / 180));
+  const isLong = description.length > 500 || lines.length > 9;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(description);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback
+    }
+  };
+
+  return (
+    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
+      {/* Description Header Bar */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
+            <FileText className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Description</h2>
+            <p className="text-[11px] text-slate-400 font-medium">
+              {wordsCount} words • ~{readTimeMin} min read
+            </p>
+          </div>
+        </div>
+
+        {/* Copy Button */}
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors cursor-pointer"
+          title="Copy description text"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-emerald-700">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5 text-slate-400" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Description Body with Smart List and Header Formatting */}
+      <div className="relative">
+        <div
+          className={`text-sm text-slate-700 leading-relaxed space-y-2 transition-all duration-300 ${
+            !isExpanded && isLong ? 'max-h-60 overflow-hidden' : ''
+          }`}
+        >
+          {lines.map((line, idx) => {
+            const trimmed = line.trim();
+
+            if (!trimmed) {
+              return <div key={idx} className="h-1.5" />;
+            }
+
+            // Detect list items (bullet points)
+            const isBullet = /^[-*•]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed);
+            if (isBullet) {
+              const cleanContent = trimmed.replace(/^[-*•]\s+/, '').replace(/^\d+\.\s+/, '');
+              return (
+                <div key={idx} className="flex items-start gap-2.5 pl-1 py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0 mt-2" />
+                  <span className="text-slate-700">{cleanContent}</span>
+                </div>
+              );
+            }
+
+            // Detect section headers (e.g. "Features & Specs:", "Location:")
+            const isHeader = /^[A-Za-z0-9 &/\-_]+:$/.test(trimmed) && trimmed.length < 40;
+            if (isHeader) {
+              return (
+                <h3 key={idx} className="font-bold text-slate-900 pt-2 text-sm tracking-tight">
+                  {trimmed}
+                </h3>
+              );
+            }
+
+            return (
+              <p key={idx} className="text-slate-700">
+                {line}
+              </p>
+            );
+          })}
+        </div>
+
+        {/* Gradient Fade if Collapsed */}
+        {!isExpanded && isLong && (
+          <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+        )}
+      </div>
+
+      {/* Show More / Show Less Button */}
+      {isLong && (
+        <div className="pt-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50/60 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-teal-200"
+          >
+            <span>{isExpanded ? 'Show Less' : 'Read Full Description'}</span>
+            {isExpanded ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Buyer Safety Recommendation Banner */}
+      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600 mt-2">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <span className="font-semibold text-slate-800">Buyer Inspection Tip</span>
+          <p className="text-[11px] text-slate-500 leading-normal">
+            Always inspect the item in person in daylight before handing over payment. Never transfer advance deposits or down-payments.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const AdOverview: React.FC<AdOverviewProps> = ({ ad, onFavoriteToggle }) => {
-  const [favorited, setFavorited] = React.useState(ad.isFavorited || false);
-  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [favorited, setFavorited] = useState(ad.isFavorited || false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleFavorite = () => {
     const next = !favorited;
@@ -34,6 +325,8 @@ export const AdOverview: React.FC<AdOverviewProps> = ({ ad, onFavoriteToggle }) 
   const handleShare = () => {
     setIsShareModalOpen(true);
   };
+
+  const specs = useMemo(() => extractListingSpecs(ad), [ad]);
 
   return (
     <div className="w-full space-y-6">
@@ -128,66 +421,59 @@ export const AdOverview: React.FC<AdOverviewProps> = ({ ad, onFavoriteToggle }) 
         </div>
       </div>
 
-      {/* Key Specifications Table Card */}
+      {/* Enhanced Key Specifications Card */}
       <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
-        <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-teal-600" />
-          <span>Listing Specifications</span>
-        </h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">Category</span>
-            <span className="font-semibold text-slate-800 truncate block">
-              {ad.category?.name || 'General'}
-            </span>
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Listing Specifications</h2>
+              <p className="text-[11px] text-slate-400 font-medium">Verified listing overview and features</p>
+            </div>
           </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            {specs.length} specs
+          </span>
+        </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">Condition</span>
-            <span className="font-semibold text-slate-800 block">
-              {ad.condition === 'NEW' ? 'Brand New' : 'Used'}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">Price Type</span>
-            <span className="font-semibold text-slate-800 block">
-              {ad.isNegotiable ? 'Negotiable' : 'Fixed Price'}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">City / Province</span>
-            <span className="font-semibold text-slate-800 truncate block">
-              {ad.locationCity}, {ad.locationState || 'PK'}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">Area / Neighborhood</span>
-            <span className="font-semibold text-slate-800 truncate block">
-              {ad.locationAddress || ad.locationCity}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-            <span className="text-slate-400 block font-medium">Listing ID</span>
-            <span className="font-mono text-slate-800 truncate block">
-              {ad.id.slice(0, 12)}
-            </span>
-          </div>
+        {/* Specs Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {specs.map((spec, idx) => {
+            const IconComponent = spec.icon;
+            return (
+              <div
+                key={idx}
+                className="p-3 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:bg-slate-50 transition-colors flex items-start gap-2.5"
+              >
+                <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-teal-700 shrink-0 mt-0.5 shadow-2xs">
+                  <IconComponent className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                    {spec.label}
+                  </span>
+                  <span
+                    className="text-xs font-bold text-slate-800 truncate block"
+                    title={spec.value}
+                  >
+                    {spec.value}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Description Section Card */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
-        <h2 className="text-base font-bold text-slate-900">Description</h2>
-        <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line space-y-2">
-          {ad.description ||
-            `Detailed listing description for ${ad.title}. Please contact the seller directly for inquiries, vehicle inspection, or purchase negotiations.`}
-        </div>
-      </div>
+      {/* Enhanced Description Section Card */}
+      <EnhancedDescription
+        description={
+          ad.description ||
+          `Detailed listing description for ${ad.title}. Please contact the seller directly for inquiries, physical inspection, or purchase negotiations.`
+        }
+      />
 
       {/* Share Ad Modal */}
       <ShareAdModal

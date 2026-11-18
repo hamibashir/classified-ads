@@ -1,5 +1,5 @@
 /**
- * Category Types for Classified Ads PK
+ * Category Types for Zaaz B
  */
 
 export interface SubcategorySummary {

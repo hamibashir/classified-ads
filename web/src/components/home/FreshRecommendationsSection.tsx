@@ -256,7 +256,7 @@ export const FreshRecommendationsSection: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [displayCount, setDisplayCount] = useState<number>(8);
 
-  const fetchFreshAds = useCallback(async () => {
+  const fetchFreshAds = useCallback(async (retryCount = 0) => {
     setLoading(true);
     try {
       const params: Record<string, string | number> = {
@@ -283,10 +283,50 @@ export const FreshRecommendationsSection: React.FC = () => {
 
       if (items.length > 0) {
         setAds(items);
+        setLoading(false);
+        return;
       } else {
         throw new Error('Empty backend list');
       }
-    } catch {
+    } catch (err: unknown) {
+      // Automatic recovery: if backend is still starting up during dev/cold boot, retry
+      const isNetworkErr =
+        err &&
+        typeof err === 'object' &&
+        (('code' in err && (err as { code?: string }).code === 'NETWORK_ERROR') ||
+          ('status' in err && (err as { status?: number }).status === 0));
+
+      if (isNetworkErr && retryCount < 3) {
+        // Render fallback immediately so screen is never blank
+        let filtered = [...FALLBACK_FRESH_ADS];
+        if (scope === 'city') {
+          const cityMatches = filtered.filter(
+            (ad) => ad.locationCity.toLowerCase() === selectedCity.name.toLowerCase()
+          );
+          if (cityMatches.length > 0) {
+            filtered = cityMatches;
+          }
+        }
+        if (selectedCategory !== 'all') {
+          filtered = filtered.filter(
+            (ad) =>
+              ad.category?.slug === selectedCategory ||
+              (ad.category?.id && ad.category.id.includes(selectedCategory))
+          );
+        }
+        filtered.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setAds(filtered);
+        setLoading(false);
+
+        // Schedule auto-retry once backend finishes starting up
+        setTimeout(() => {
+          fetchFreshAds(retryCount + 1);
+        }, 1500 * (retryCount + 1));
+        return;
+      }
+
       // Fallback filtering
       let filtered = [...FALLBACK_FRESH_ADS];
 

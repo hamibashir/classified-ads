@@ -22,233 +22,8 @@ import { AdListItem } from '@/types/ad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// Rich Pakistani classified ads dataset for search filtering
-const SEARCH_FALLBACK_ADS: (AdListItem & { subcatSlug?: string })[] = [
-  {
-    id: 's-1',
-    title: 'Toyota Corolla Altis Grande 1.8 CVT-i 2022',
-    slug: 'toyota-corolla-altis-grande-2022',
-    price: 6850000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'USED',
-    locationCity: 'Lahore',
-    locationAddress: 'DHA Phase 5',
-    locationState: 'Punjab',
-    latitude: 31.4646,
-    longitude: 74.3942,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 840,
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    images: [
-      {
-        id: 'img-s-1',
-        url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
-    subcatSlug: 'cars',
-  },
-  {
-    id: 's-2',
-    title: 'Honda Civic Oriel 1.8 i-VTEC Sunroof 2021',
-    slug: 'honda-civic-oriel-2021-lahore',
-    price: 5400000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'USED',
-    locationCity: 'Lahore',
-    locationAddress: 'Gulberg III',
-    locationState: 'Punjab',
-    latitude: 31.5126,
-    longitude: 74.3484,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 920,
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-    images: [
-      {
-        id: 'img-s-2',
-        url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-motors', name: 'Cars', slug: 'motors-vehicles' },
-    subcatSlug: 'cars',
-  },
-  {
-    id: 's-3',
-    title: 'Apple iPhone 14 Pro Max 256GB Deep Purple (PTA Approved)',
-    slug: 'iphone-14-pro-max-256gb-karachi',
-    price: 295000,
-    currency: 'PKR',
-    isNegotiable: false,
-    condition: 'USED',
-    locationCity: 'Karachi',
-    locationAddress: 'Clifton Block 4',
-    locationState: 'Sindh',
-    latitude: 24.8138,
-    longitude: 67.0306,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 1100,
-    createdAt: new Date(Date.now() - 10800000).toISOString(),
-    images: [
-      {
-        id: 'img-s-3',
-        url: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-mobiles', name: 'Smartphones', slug: 'mobiles-tablets' },
-    subcatSlug: 'smartphones',
-  },
-  {
-    id: 's-4',
-    title: 'Samsung Galaxy S23 Ultra 512GB Green (Box Packed)',
-    slug: 'samsung-s23-ultra-islamabad',
-    price: 275000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'NEW',
-    locationCity: 'Islamabad',
-    locationAddress: 'Sector F-7/2',
-    locationState: 'Islamabad Capital Territory',
-    latitude: 33.7215,
-    longitude: 73.0545,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 650,
-    createdAt: new Date(Date.now() - 14400000).toISOString(),
-    images: [
-      {
-        id: 'img-s-4',
-        url: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-mobiles', name: 'Smartphones', slug: 'mobiles-tablets' },
-    subcatSlug: 'smartphones',
-  },
-  {
-    id: 's-5',
-    title: 'MacBook Pro 16 M2 Max 32GB 1TB Space Gray',
-    slug: 'macbook-pro-16-m2-max-lahore',
-    price: 650000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'USED',
-    locationCity: 'Lahore',
-    locationAddress: 'Model Town',
-    locationState: 'Punjab',
-    latitude: 31.4827,
-    longitude: 74.3184,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 480,
-    createdAt: new Date(Date.now() - 18000000).toISOString(),
-    images: [
-      {
-        id: 'img-s-5',
-        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-elec', name: 'Laptops', slug: 'electronics-appliances' },
-    subcatSlug: 'computers-laptops',
-  },
-  {
-    id: 's-6',
-    title: 'Brand New 1 Kanal Luxury Designer House for Sale',
-    slug: '1-kanal-luxury-designer-house-islamabad',
-    price: 65000000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'NEW',
-    locationCity: 'Islamabad',
-    locationAddress: 'Sector F-7/2',
-    locationState: 'Islamabad Capital Territory',
-    latitude: 33.7215,
-    longitude: 73.0545,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 1600,
-    createdAt: new Date(Date.now() - 21600000).toISOString(),
-    images: [
-      {
-        id: 'img-s-6',
-        url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-prop', name: 'Houses', slug: 'property' },
-    subcatSlug: 'houses-for-sale',
-  },
-  {
-    id: 's-7',
-    title: 'Yamaha YBR 125G 2023 Black (First Owner, Low Mileage)',
-    slug: 'yamaha-ybr-125g-rawalpindi',
-    price: 385000,
-    currency: 'PKR',
-    isNegotiable: true,
-    condition: 'USED',
-    locationCity: 'Rawalpindi',
-    locationAddress: 'Saddar',
-    locationState: 'Punjab',
-    latitude: 33.5973,
-    longitude: 73.0479,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 310,
-    createdAt: new Date(Date.now() - 25200000).toISOString(),
-    images: [
-      {
-        id: 'img-s-7',
-        url: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-bikes', name: 'Motorcycles', slug: 'motorcycles' },
-    subcatSlug: 'motorcycles',
-  },
-  {
-    id: 's-8',
-    title: 'Home Solar System 10kW On-Grid Inverter & Tier-1 Panels',
-    slug: 'home-solar-system-10kw-lahore',
-    price: 1350000,
-    currency: 'PKR',
-    isNegotiable: false,
-    condition: 'NEW',
-    locationCity: 'Lahore',
-    locationAddress: 'Johar Town',
-    locationState: 'Punjab',
-    latitude: 31.4697,
-    longitude: 74.2728,
-    showPhone: true,
-    allowWhatsapp: true,
-    viewsCount: 540,
-    createdAt: new Date(Date.now() - 28800000).toISOString(),
-    images: [
-      {
-        id: 'img-s-8',
-        url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
-        order: 0,
-        isFeatured: true,
-      },
-    ],
-    category: { id: 'cat-services', name: 'Services', slug: 'services' },
-    subcatSlug: 'services',
-  },
-];
+import { SEARCH_FALLBACK_ADS } from '@/constants/fallbackSearchAds';
+
 
 function SearchContainer() {
   const router = useRouter();
@@ -284,6 +59,16 @@ function SearchContainer() {
       router.push(`/search?${current.toString()}`, { scroll: false });
     },
     [router, searchParams]
+  );
+
+  const handleCategorySelect = useCallback(
+    (catSlug: string, subcatSlug?: string | null) => {
+      updateUrlParams({
+        category: catSlug || null,
+        subcat: subcatSlug || null,
+      });
+    },
+    [updateUrlParams]
   );
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -338,25 +123,68 @@ function SearchContainer() {
       let filtered = [...SEARCH_FALLBACK_ADS];
 
       if (query) {
-        const lowerQ = query.toLowerCase();
-        filtered = filtered.filter(
-          (ad) =>
-            ad.title.toLowerCase().includes(lowerQ) ||
-            ad.category?.name.toLowerCase().includes(lowerQ)
-        );
+        const normQuery = query.toLowerCase().replace(/[\s\-_.,/]+/g, '');
+        const tokens = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+
+        if (normQuery.length > 0) {
+          filtered = filtered.filter((ad) => {
+            const titleLow = ad.title.toLowerCase();
+            const descLow = (ad.description || '').toLowerCase();
+            const catLow = (ad.category?.name || '').toLowerCase();
+            const slugLow = ad.slug.toLowerCase();
+
+            // 1. Exact or partial match completely ignoring spaces, dashes, and punctuation
+            const normTitle = titleLow.replace(/[\s\-_.,/]+/g, '');
+            const normDesc = descLow.replace(/[\s\-_.,/]+/g, '');
+            const normCat = catLow.replace(/[\s\-_.,/]+/g, '');
+            const normSlug = slugLow.replace(/[\s\-_.,/]+/g, '');
+
+            if (
+              normTitle.includes(normQuery) ||
+              normDesc.includes(normQuery) ||
+              normCat.includes(normQuery) ||
+              normSlug.includes(normQuery)
+            ) {
+              return true;
+            }
+
+            // 2. Multi-token match (when separated keywords are typed)
+            return tokens.every(
+              (token) =>
+                titleLow.includes(token) ||
+                descLow.includes(token) ||
+                catLow.includes(token) ||
+                slugLow.includes(token)
+            );
+          });
+        }
       }
 
       if (category) {
-        filtered = filtered.filter(
-          (ad) =>
-            ad.category?.slug === category ||
-            (ad.category?.id && ad.category.id.includes(category))
-        );
+        const catLow = category.toLowerCase();
+        filtered = filtered.filter((ad) => {
+          const adSlug = (ad.category?.slug || '').toLowerCase();
+          const adId = (ad.category?.id || '').toLowerCase();
+          return (
+            adSlug === catLow ||
+            adId === catLow ||
+            (catLow === 'fashion' && (adSlug === 'fashion-beauty' || adSlug === 'fashion')) ||
+            (catLow === 'fashion-beauty' && (adSlug === 'fashion-beauty' || adSlug === 'fashion')) ||
+            (catLow === 'furniture' && adSlug === 'furniture') ||
+            (catLow === 'animals' && adSlug === 'animals') ||
+            (catLow === 'hobbies' && (adSlug === 'sports-hobbies' || adSlug === 'hobbies')) ||
+            (catLow === 'sports-hobbies' && (adSlug === 'sports-hobbies' || adSlug === 'hobbies')) ||
+            (catLow === 'kids' && adSlug === 'kids') ||
+            (catLow === 'bikes' && (adSlug === 'motorcycles' || adSlug === 'bikes')) ||
+            (catLow === 'motorcycles' && (adSlug === 'motorcycles' || adSlug === 'bikes')) ||
+            adId.includes(catLow)
+          );
+        });
       }
 
       if (subcat) {
+        const s = subcat.toLowerCase();
         filtered = filtered.filter((ad) => {
-          const s = subcat.toLowerCase();
           const adSub = (ad.subcatSlug || '').toLowerCase();
           return (
             adSub === s ||
@@ -491,7 +319,7 @@ function SearchContainer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8 items-start">
           {/* Left Desktop Sidebar */}
-          <div className="hidden lg:block lg:col-span-1 bg-card p-4 sm:p-5 rounded-2xl border border-border/80 sticky top-24">
+          <div className="hidden lg:block lg:col-span-1 bg-card p-4 sm:p-5 rounded-2xl border border-border/80 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain pr-2 custom-scrollbar">
             <FilterSidebar
               selectedCategory={category}
               selectedSubcategory={subcat}
@@ -499,8 +327,7 @@ function SearchContainer() {
               minPrice={minPrice}
               maxPrice={maxPrice}
               condition={condition}
-              onCategoryChange={(cat) => updateUrlParams({ category: cat, subcat: null })}
-              onSubcategoryChange={(s) => updateUrlParams({ subcat: s || null })}
+              onCategorySelect={handleCategorySelect}
               onCityChange={(c) => updateUrlParams({ city: c })}
               onPriceChange={(min, max) =>
                 updateUrlParams({ minPrice: min || null, maxPrice: max || null })
@@ -528,8 +355,7 @@ function SearchContainer() {
                   minPrice={minPrice}
                   maxPrice={maxPrice}
                   condition={condition}
-                  onCategoryChange={(cat) => updateUrlParams({ category: cat, subcat: null })}
-                  onSubcategoryChange={(s) => updateUrlParams({ subcat: s || null })}
+                  onCategorySelect={handleCategorySelect}
                   onCityChange={(c) => updateUrlParams({ city: c })}
                   onPriceChange={(min, max) =>
                     updateUrlParams({ minPrice: min || null, maxPrice: max || null })

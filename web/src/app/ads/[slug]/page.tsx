@@ -12,6 +12,7 @@ import { ReportAdModal } from '@/components/ads/ReportAdModal';
 import { SimilarAdsSection } from '@/components/ads/SimilarAdsSection';
 import { AdListItem } from '@/types/ad';
 import { Button } from '@/components/ui/button';
+import { SEARCH_FALLBACK_ADS } from '@/constants/fallbackSearchAds';
 
 // Seeded Pakistani listings for offline preview & testing
 const FALLBACK_CATALOG: Record<string, AdListItem> = {
@@ -199,8 +200,10 @@ export default function AdDetailsPage({ params }: AdDetailsPageProps) {
       } catch {
         // Fallback resolution
         if (isMounted) {
+          const matchedSearchAd = SEARCH_FALLBACK_ADS.find((item) => item.slug === slug);
           const fallback =
             FALLBACK_CATALOG[slug] ||
+            matchedSearchAd ||
             Object.values(FALLBACK_CATALOG).find((item) => item.slug === slug) ||
             FALLBACK_CATALOG['toyota-corolla-gli-13-automatic'];
           setAd(fallback);

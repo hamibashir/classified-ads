@@ -65,7 +65,7 @@ const REPORT_REASONS: {
   {
     id: 'OTHER',
     label: 'Other Policy Violation',
-    desc: 'Any other concern violating Classified Ads PK community rules.',
+    desc: 'Any other concern violating Zaaz B community rules.',
   },
 ];
 
@@ -152,7 +152,7 @@ export const ReportAdModal: React.FC<ReportAdModalProps> = ({
                 Report Submitted
               </DialogTitle>
               <DialogDescription className="text-sm text-slate-600 max-w-sm mx-auto pt-1">
-                Thank you for helping keep <strong>Classified Ads PK</strong> safe.
+                Thank you for helping keep <strong>Zaaz B</strong> safe.
                 Our moderation team will review this ad within 24 hours.
               </DialogDescription>
             </DialogHeader>

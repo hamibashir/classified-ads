@@ -245,7 +245,7 @@ export const InspectionChecklist: React.FC<InspectionChecklistProps> = ({
       <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
         <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
         <p className="text-[11px] sm:text-xs leading-relaxed text-amber-800">
-          <strong>Security Notice:</strong> Classified Ads PK does not operate escrow services or
+          <strong>Security Notice:</strong> Zaaz B does not operate escrow services or
           online delivery couriers. Always complete inspections physically and deal locally with
           cash or instant on-the-spot bank transfer upon verification.
         </p>

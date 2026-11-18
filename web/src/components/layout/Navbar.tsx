@@ -71,15 +71,16 @@ export const Navbar: React.FC = () => {
                 href="/"
                 className="flex items-center gap-2.5 group transition-opacity hover:opacity-90"
               >
-                <span className="w-8 h-8 rounded-lg bg-[#0D382B] dark:bg-emerald-500 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-sm tracking-tighter">
-                  PK
+                <span className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-xs tracking-tight shadow-xs">
+                  ZB
                 </span>
                 <div className="hidden min-[420px]:block">
-                  <div className="text-sm font-bold text-foreground tracking-tight leading-none">
-                    Classifieds<span className="text-emerald-800 dark:text-emerald-400">.pk</span>
+                  <div className="text-sm font-extrabold text-foreground tracking-tight leading-none flex items-center gap-1">
+                    <span>Zaaz</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-black">B</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground leading-tight font-medium mt-0.5">
-                    Verified Marketplace
+                  <p className="text-[10px] text-muted-foreground leading-tight font-semibold tracking-wider uppercase mt-0.5">
+                    Premier Marketplace
                   </p>
                 </div>
               </Link>

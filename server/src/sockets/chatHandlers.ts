@@ -198,10 +198,10 @@ export const registerChatHandlers = (io: SocketIOServer, socket: Socket): void =
           `[Socket.IO] User ${currentUserId} sent message ${savedMessage.id} in conversation ${conversationId}`
         );
 
-        // 4. Broadcast to everyone in the conversation room (including sender)
-        io.to(conversationId).emit('new_message', savedMessage);
+        // 4. Broadcast to other participants in the conversation room
+        socket.to(conversationId).emit('new_message', savedMessage);
 
-        // 5. Acknowledge sender callback
+        // 5. Acknowledge sender callback with the saved message
         callback?.({ success: true, data: savedMessage });
       } catch (error) {
         console.error('[Socket.IO] Error in send_message:', error);

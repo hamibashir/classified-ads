@@ -88,10 +88,16 @@ export const createConversation = async (
         existingConversation.messages.unshift(newMessage);
       }
 
+      const isBuyer = existingConversation.buyerId === buyerId;
+      const otherUser = isBuyer ? existingConversation.seller : existingConversation.buyer;
+
       sendSuccess(
         res,
         {
           ...existingConversation,
+          otherUser,
+          unreadCount: 0,
+          lastMessage: existingConversation.messages[0] || null,
           ad: {
             ...existingConversation.ad,
             price: Number(existingConversation.ad.price),
@@ -140,6 +146,9 @@ export const createConversation = async (
         messages.push(msg);
       }
 
+      const isBuyer = conv.buyerId === buyerId;
+      const otherUser = isBuyer ? conv.seller : conv.buyer;
+
       return {
         ...conv,
         ad: {
@@ -147,6 +156,9 @@ export const createConversation = async (
           price: Number(conv.ad.price),
         },
         messages,
+        lastMessage: messages[0] || null,
+        otherUser,
+        unreadCount: 0,
       };
     });
 
@@ -273,7 +285,7 @@ export const getConversations = async (
 
     sendSuccess(
       res,
-      formattedConversations,
+      { conversations: formattedConversations },
       'Conversations retrieved successfully',
       200,
       { pagination }
@@ -364,10 +376,105 @@ export const getMessages = async (
 
     sendSuccess(
       res,
-      messages,
+      { messages },
       'Messages retrieved successfully',
       200,
       { pagination }
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Retrieve a single conversation thread by ID
+ * GET /api/v1/chat/conversations/:id
+ */
+export const getConversationById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      sendError(res, 'UNAUTHORIZED', 'Authentication required', undefined, 401);
+      return;
+    }
+
+    const { id } = req.params;
+
+    const conv = await prisma.conversation.findUnique({
+      where: { id },
+      include: {
+        ad: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            price: true,
+            currency: true,
+            status: true,
+            images: { orderBy: { order: 'asc' }, take: 1 },
+          },
+        },
+        buyer: { select: { id: true, name: true, avatarUrl: true } },
+        seller: { select: { id: true, name: true, avatarUrl: true } },
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!conv) {
+      sendError(
+        res,
+        'CONVERSATION_NOT_FOUND',
+        'Conversation not found',
+        undefined,
+        404
+      );
+      return;
+    }
+
+    if (conv.buyerId !== userId && conv.sellerId !== userId && req.user?.role !== 'ADMIN') {
+      sendError(
+        res,
+        'FORBIDDEN',
+        'You do not have permission to view this conversation',
+        undefined,
+        403
+      );
+      return;
+    }
+
+    const isBuyer = conv.buyerId === userId;
+    const otherUser = isBuyer ? conv.seller : conv.buyer;
+
+    const formattedConversation = {
+      id: conv.id,
+      adId: conv.adId,
+      ad: {
+        ...conv.ad,
+        price: Number(conv.ad.price),
+      },
+      buyerId: conv.buyerId,
+      sellerId: conv.sellerId,
+      buyer: conv.buyer,
+      seller: conv.seller,
+      otherUser,
+      lastMessage: conv.messages[0] || null,
+      unreadCount: 0,
+      createdAt: conv.createdAt,
+      updatedAt: conv.updatedAt,
+    };
+
+    sendSuccess(
+      res,
+      formattedConversation,
+      'Conversation retrieved successfully',
+      200
     );
   } catch (error) {
     next(error);

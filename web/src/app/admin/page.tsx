@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
         <div className="relative z-10 max-w-2xl space-y-2">
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[11px] font-medium tracking-wide">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Classified Ads PK Administration</span>
+            <span>Zaaz B Administration</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
             Welcome back, {user?.name || 'Administrator'}

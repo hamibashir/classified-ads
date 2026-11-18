@@ -21,15 +21,16 @@ export const Footer: React.FC = () => {
           {/* Brand & Platform Intro */}
           <div className="space-y-4 md:col-span-1">
             <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-[#0D382B] dark:bg-emerald-500 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs tracking-tighter">
-                PK
+              <span className="w-7 h-7 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-xs tracking-tight shadow-xs">
+                ZB
               </span>
-              <span className="font-bold text-foreground text-sm tracking-tight">
-                Classifieds<span className="text-emerald-800 dark:text-emerald-400">.pk</span>
+              <span className="font-extrabold text-foreground text-sm tracking-tight flex items-center gap-1">
+                <span>Zaaz</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-black">B</span>
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Pakistan&apos;s verified local marketplace for vehicles, mobile phones, electronics, real estate, and services with direct peer-to-peer communication.
+              Pakistan&apos;s premier verified marketplace for vehicles, mobile phones, electronics, real estate, and services with direct peer-to-peer communication.
             </p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium pt-1">
               <ShieldCheck className="h-4 w-4 text-emerald-800 dark:text-emerald-400" />
@@ -119,7 +120,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar & Copyright */}
         <div className="border-t border-border/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Classifieds.pk. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Zaaz B. All rights reserved.</p>
           <div className="flex items-center gap-1.5">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
             <span>Pakistan Marketplace (PKR)</span>

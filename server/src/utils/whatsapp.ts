@@ -36,7 +36,7 @@ export const formatAdWhatsAppMessage = (
   siteUrl?: string
 ): string => {
   const cleanTitle = adTitle.trim();
-  let message = `Assalam-o-Alaikum, I saw your ad "${cleanTitle}" on Classified Ads PK. Is it still available?`;
+  let message = `Assalam-o-Alaikum, I saw your ad "${cleanTitle}" on Zaaz B. Is it still available?`;
 
   if (adSlug && siteUrl) {
     const cleanUrl = siteUrl.replace(/\/+$/, '');

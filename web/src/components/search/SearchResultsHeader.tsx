@@ -89,7 +89,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
                 Classified Ads in <span className="text-teal-700">{cityName}</span>
               </>
             ) : (
-              'All Classified Ads in Pakistan'
+              'All Listings on Zaaz B'
             )}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">

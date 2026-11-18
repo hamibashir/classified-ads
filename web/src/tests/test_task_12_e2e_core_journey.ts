@@ -1,4 +1,4 @@
-import { loginSchema, registerSchema, normalizePakistaniPhone, isValidPakistaniMobile } from '../lib/validations/auth';
+import { registerSchema, normalizePakistaniPhone, isValidPakistaniMobile } from '../lib/validations/auth';
 import { createAdSchema } from '../lib/validations/ad';
 import { calculateDistanceKm } from '../lib/geo-utils';
 import { buildWhatsAppUrl, normalizePakistaniPhone as normalizeWhatsAppPhone } from '../lib/whatsapp';
