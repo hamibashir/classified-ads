@@ -36,7 +36,7 @@ class AppTheme {
         color: AppColors.cardLight,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(14.0),
           side: const BorderSide(color: AppColors.borderLight, width: 1.0),
         ),
         margin: EdgeInsets.zero,
@@ -48,7 +48,7 @@ class AppTheme {
           elevation: 0,
           minimumSize: const Size.fromHeight(48.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           textStyle: AppTextStyles.button,
         ),
@@ -59,7 +59,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.borderLight, width: 1.0),
           minimumSize: const Size.fromHeight(48.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           textStyle: AppTextStyles.button,
         ),
@@ -152,7 +152,7 @@ class AppTheme {
         color: AppColors.cardDark,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(14.0),
           side: const BorderSide(color: AppColors.borderDark, width: 1.0),
         ),
         margin: EdgeInsets.zero,
@@ -164,7 +164,7 @@ class AppTheme {
           elevation: 0,
           minimumSize: const Size.fromHeight(48.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           textStyle: AppTextStyles.button,
         ),
@@ -175,7 +175,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.borderDark, width: 1.0),
           minimumSize: const Size.fromHeight(48.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           textStyle: AppTextStyles.button,
         ),

@@ -61,41 +61,88 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         titleSpacing: 16.0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            const Text(
-              AppConstants.appName,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w700,
+            // ZB Monogram Insignia
+            Container(
+              width: 34.0,
+              height: 34.0,
+              decoration: BoxDecoration(
                 color: AppColors.foregroundLight,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                AppConstants.brandInsignia,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
-            // Location Chip button
-            InkWell(
-              onTap: () => CitySelectorBottomSheet.show(context),
-              borderRadius: BorderRadius.circular(4.0),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      currentLocation.displayName,
-                      style: const TextStyle(
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryLight,
+            const SizedBox(width: 10.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: const TextSpan(
+                      text: 'Zaaz ',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.foregroundLight,
+                        letterSpacing: -0.3,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'B',
+                          style: TextStyle(
+                            color: AppColors.primaryLight,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Location Chip button
+                  InkWell(
+                    onTap: () => CitySelectorBottomSheet.show(context),
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 13.0,
+                            color: AppColors.primaryLight,
+                          ),
+                          const SizedBox(width: 2.0),
+                          Flexible(
+                            child: Text(
+                              currentLocation.displayName,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryLight,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            size: 15.0,
+                            color: AppColors.primaryLight,
+                          ),
+                        ],
                       ),
                     ),
-                    const Icon(
-                      Icons.arrow_drop_down,
-                      size: 16.0,
-                      color: AppColors.primaryLight,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -48,6 +48,16 @@ class ChatProvider extends ChangeNotifier {
       if (!list.any((m) => m.id == message.id)) {
         list.add(message);
         _messages[message.conversationId] = list;
+
+        // Update conversation list item preview
+        final convIdx = _conversations.indexWhere((c) => c.id == message.conversationId);
+        if (convIdx != -1) {
+          final current = _conversations[convIdx];
+          _conversations[convIdx] = current.copyWith(
+            lastMessage: message,
+            updatedAt: message.createdAt,
+          );
+        }
         notifyListeners();
       }
     };

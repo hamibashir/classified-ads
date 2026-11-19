@@ -118,7 +118,7 @@ class AdsProvider extends ChangeNotifier {
   }
 
   void setSearchQuery(String query, UserLocation location) {
-    _searchQuery = query.trim();
+    _searchQuery = query.trim().replaceAll(RegExp(r'\s+'), ' ');
     fetchAds(location: location, refresh: true);
   }
 

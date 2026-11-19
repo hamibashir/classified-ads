@@ -34,7 +34,11 @@ void main() {
 
     await tester.pump();
 
-    expect(find.text(AppConstants.appName), findsWidgets);
+    expect(find.text(AppConstants.brandInsignia), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is RichText && w.text.toPlainText().contains('Zaaz')),
+      findsWidgets,
+    );
     expect(find.byType(TextField), findsOneWidget);
   });
 }

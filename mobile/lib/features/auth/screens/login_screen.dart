@@ -67,35 +67,63 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // App Icon / Logo
+                  // Zaaz B Insignia Logo Mark
                   Center(
                     child: Container(
-                      width: 64.0,
-                      height: 64.0,
+                      width: 56.0,
+                      height: 56.0,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
+                        color: AppColors.foregroundLight,
+                        borderRadius: BorderRadius.circular(14.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10.0,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.storefront_outlined,
-                        size: 32.0,
-                        color: AppColors.primaryLight,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        AppConstants.brandInsignia,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16.0),
 
                   Center(
-                    child: Text(
-                      'Welcome to ${AppConstants.appName}',
-                      style: AppTextStyles.h2,
+                    child: RichText(
                       textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        text: 'Welcome to Zaaz ',
+                        style: TextStyle(
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.foregroundLight,
+                          letterSpacing: -0.4,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'B',
+                            style: TextStyle(
+                              color: AppColors.primaryLight,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6.0),
                   const Center(
                     child: Text(
-                      'Sign in to post ads, manage listings, and chat with buyers',
+                      'Sign in to post verified ads, track favorites, and chat in real-time',
                       style: TextStyle(
                         fontSize: 13.0,
                         color: AppColors.mutedForegroundLight,

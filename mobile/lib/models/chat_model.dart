@@ -151,6 +151,32 @@ class ConversationModel {
     return buyer;
   }
 
+  ConversationModel copyWith({
+    String? id,
+    String? adId,
+    String? buyerId,
+    String? sellerId,
+    DateTime? updatedAt,
+    ChatAdRef? ad,
+    ChatUserRef? buyer,
+    ChatUserRef? seller,
+    ChatMessageModel? lastMessage,
+    int? unreadCount,
+  }) {
+    return ConversationModel(
+      id: id ?? this.id,
+      adId: adId ?? this.adId,
+      buyerId: buyerId ?? this.buyerId,
+      sellerId: sellerId ?? this.sellerId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      ad: ad ?? this.ad,
+      buyer: buyer ?? this.buyer,
+      seller: seller ?? this.seller,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+    );
+  }
+
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     ChatMessageModel? latestMsg;
     if (json['lastMessage'] is Map<String, dynamic>) {

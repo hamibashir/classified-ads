@@ -73,17 +73,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Zaaz B Insignia Logo Mark
                   Center(
-                    child: Text(
-                      'Join ${AppConstants.appName}',
-                      style: AppTextStyles.h2,
+                    child: Container(
+                      width: 56.0,
+                      height: 56.0,
+                      decoration: BoxDecoration(
+                        color: AppColors.foregroundLight,
+                        borderRadius: BorderRadius.circular(14.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10.0,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        AppConstants.brandInsignia,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  Center(
+                    child: RichText(
                       textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        text: 'Join Zaaz ',
+                        style: TextStyle(
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.foregroundLight,
+                          letterSpacing: -0.4,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'B',
+                            style: TextStyle(
+                              color: AppColors.primaryLight,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6.0),
                   const Center(
                     child: Text(
-                      'Post ads, contact sellers directly on WhatsApp, and trade locally',
+                      'Post verified ads, contact sellers directly on WhatsApp, and trade locally',
                       style: TextStyle(
                         fontSize: 13.0,
                         color: AppColors.mutedForegroundLight,

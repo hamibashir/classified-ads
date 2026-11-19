@@ -21,7 +21,7 @@ class LauncherUtils {
     required String adTitle,
   }) {
     final formattedPhone = formatPakistaniPhoneForWhatsApp(phone);
-    final text = 'Hi, I am contacting you regarding your ad: "$adTitle" on Classified Ads PK.';
+    final text = 'Assalam-o-Alaikum, I saw your ad "$adTitle" on Zaaz B. Is it still available?';
     return Uri.parse(
       'https://wa.me/$formattedPhone?text=${Uri.encodeComponent(text)}',
     );

@@ -35,6 +35,7 @@ class _ReportAdBottomSheetState extends State<ReportAdBottomSheet> {
     {'value': 'FRAUD', 'label': 'Fraud / Counterfeit Item'},
     {'value': 'INAPPROPRIATE', 'label': 'Inappropriate / Offensive Content'},
     {'value': 'DUPLICATE', 'label': 'Duplicate Listing'},
+    {'value': 'OTHER', 'label': 'Violates Zaaz B community rules'},
   ];
 
   String _selectedReason = 'SPAM';

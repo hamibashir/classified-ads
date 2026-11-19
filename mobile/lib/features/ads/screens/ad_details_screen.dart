@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/network/api_client.dart';
@@ -10,6 +11,7 @@ import '../../../core/utils/launcher_utils.dart';
 import '../../../models/ad_model.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../chat/screens/chat_screen.dart';
+import '../widgets/mobile_ad_card.dart';
 import '../widgets/report_ad_bottom_sheet.dart';
 
 class AdDetailsScreen extends StatefulWidget {
@@ -37,12 +39,14 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
   String? _errorMessage;
   int _currentImageIndex = 0;
   bool _isPhoneRevealed = false;
+  List<AdModel> _similarAds = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.initialAd != null) {
       _ad = widget.initialAd;
+      _fetchSimilarAds(_ad?.category?.slug, _ad!.id);
     } else {
       _fetchAdDetails();
     }
@@ -52,6 +56,38 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchSimilarAds(String? categorySlug, String currentAdId) async {
+    if (categorySlug == null || categorySlug.isEmpty) return;
+
+    final res = await _apiClient.get<List<AdModel>>(
+      '/ads',
+      queryParameters: {
+        'category': categorySlug,
+        'limit': 6,
+      },
+      fromJsonT: (data) {
+        if (data is Map && data['ads'] is List) {
+          return (data['ads'] as List)
+              .map((a) => AdModel.fromJson(a as Map<String, dynamic>))
+              .toList();
+        } else if (data is List) {
+          return data
+              .map((a) => AdModel.fromJson(a as Map<String, dynamic>))
+              .toList();
+        }
+        return <AdModel>[];
+      },
+    );
+
+    if (mounted) {
+      setState(() {
+        if (res.success && res.data != null) {
+          _similarAds = res.data!.where((item) => item.id != currentAdId).toList();
+        }
+      });
+    }
   }
 
   Future<void> _fetchAdDetails() async {
@@ -70,6 +106,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
         _isLoading = false;
         if (response.success && response.data != null) {
           _ad = response.data;
+          _fetchSimilarAds(_ad?.category?.slug, _ad!.id);
         } else {
           _errorMessage = response.error?.message ?? 'Failed to load ad details.';
         }
@@ -287,33 +324,134 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                   const Divider(),
                   const SizedBox(height: 16.0),
 
-                  // Quick Attributes Grid (Condition & Posted Date)
-                  const Text('Attributes', style: AppTextStyles.h3),
+                  // Specifications Grid
+                  const Text('Overview & Specifications', style: AppTextStyles.h3),
                   const SizedBox(height: 10.0),
-                  Row(
-                    children: [
-                      _buildAttributeChip(
-                        title: 'Condition',
-                        value: ad.conditionLabel,
-                        icon: Icons.check_circle_outline,
-                      ),
-                      const SizedBox(width: 12.0),
-                      _buildAttributeChip(
-                        title: 'Posted',
-                        value: DateFormat('dd MMM yyyy').format(ad.createdAt),
-                        icon: Icons.calendar_today_outlined,
-                      ),
-                    ],
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.cardLight,
+                      borderRadius: BorderRadius.circular(14.0),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildSpecRow('Condition', ad.conditionLabel, Icons.verified_outlined, isTop: true),
+                        const Divider(height: 1.0, color: AppColors.borderLight),
+                        _buildSpecRow('Category', ad.category?.name ?? 'General', Icons.category_outlined),
+                        const Divider(height: 1.0, color: AppColors.borderLight),
+                        _buildSpecRow('City', ad.locationCity, Icons.location_city_outlined),
+                        if (ad.locationAddress != null && ad.locationAddress!.isNotEmpty) ...[
+                          const Divider(height: 1.0, color: AppColors.borderLight),
+                          _buildSpecRow('Area / Address', ad.locationAddress!, Icons.map_outlined),
+                        ],
+                        const Divider(height: 1.0, color: AppColors.borderLight),
+                        _buildSpecRow('Price', ad.isNegotiable ? 'Negotiable' : 'Fixed Price', Icons.sell_outlined, isBottom: true),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Buyer Inspection Tip Card
+                  Container(
+                    padding: const EdgeInsets.all(14.0),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.shield_outlined, size: 20.0, color: AppColors.primaryLight),
+                        const SizedBox(width: 10.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Buyer Inspection Tip',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryLight,
+                                ),
+                              ),
+                              SizedBox(height: 3.0),
+                              Text(
+                                'Always inspect the item in person in daylight before handing over payment. Never transfer advance deposits or down-payments.',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: AppColors.mutedForegroundLight,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20.0),
 
-                  // Description
-                  const Text('Description', style: AppTextStyles.h3),
-                  const SizedBox(height: 8.0),
+                  // Description Header & Meta Stats
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Description', style: AppTextStyles.h3),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: ad.description));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Description copied to clipboard'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(6.0),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.copy_outlined, size: 14.0, color: AppColors.primaryLight),
+                              SizedBox(width: 4.0),
+                              Text(
+                                'Copy',
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4.0),
                   Text(
-                    ad.description,
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.foregroundLight,
+                    '${ad.description.trim().split(RegExp(r'\s+')).length} words • ~${(ad.description.trim().split(RegExp(r'\s+')).length / 180).ceil()} min read',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppColors.mutedForegroundLight,
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14.0),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Text(
+                      ad.description,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.foregroundLight,
+                        height: 1.5,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24.0),
@@ -325,7 +463,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: AppColors.cardLight,
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(14.0),
                       border: Border.all(color: AppColors.borderLight),
                     ),
                     child: Row(
@@ -386,6 +524,58 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                       ],
                     ),
                   ),
+
+                  // More Listings You May Like (Category-Aware Recommendations)
+                  if (_similarAds.isNotEmpty) ...[
+                    const SizedBox(height: 24.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'More Listings You May Like',
+                          style: AppTextStyles.h3,
+                        ),
+                        if (ad.category != null)
+                          Text(
+                            ad.category!.name,
+                            style: const TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryLight,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12.0),
+                    SizedBox(
+                      height: 240.0,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _similarAds.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 12.0),
+                        itemBuilder: (context, index) {
+                          final similar = _similarAds[index];
+                          return SizedBox(
+                            width: 175.0,
+                            child: MobileAdCard(
+                              ad: similar,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => AdDetailsScreen(
+                                      slug: similar.slug,
+                                      initialAd: similar,
+                                    ),
+                                  ),
+                                );
+                              },
+                              onToggleFavorite: () {},
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
 
                   const SizedBox(height: 100.0), // Padding for bottom sticky bar
                 ],
@@ -489,46 +679,35 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
     );
   }
 
-  Widget _buildAttributeChip({
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-        decoration: BoxDecoration(
-          color: AppColors.mutedLight,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18.0, color: AppColors.primaryLight),
-            const SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 11.0, color: AppColors.mutedForegroundLight),
-                  ),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13.0,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.foregroundLight,
-                    ),
-                  ),
-                ],
+  Widget _buildSpecRow(String label, String value, IconData icon, {bool isTop = false, bool isBottom = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 18.0, color: AppColors.primaryLight),
+          const SizedBox(width: 12.0),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13.0,
+              color: AppColors.mutedForegroundLight,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13.0,
+                color: AppColors.foregroundLight,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

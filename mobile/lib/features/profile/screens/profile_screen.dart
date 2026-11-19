@@ -177,13 +177,13 @@ class ProfileScreen extends StatelessWidget {
             _buildMenuItem(
               icon: Icons.info_outline,
               title: 'About ${AppConstants.appName}',
-              subtitle: 'Version 1.0.0 • Made for Pakistan',
+              subtitle: 'Version 1.0.0 • ${AppConstants.brandTagline}',
               onTap: () {
                 showAboutDialog(
                   context: context,
                   applicationName: AppConstants.appName,
                   applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2026 Classified Ads PK. All rights reserved.',
+                  applicationLegalese: '© 2026 Zaaz B. All rights reserved.',
                 );
               },
             ),
@@ -241,7 +241,7 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cardLight,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(14.0),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: ListTile(

@@ -1,5 +1,7 @@
 class AppConstants {
-  static const String appName = 'Classified Ads PK';
+  static const String appName = 'Zaaz B';
+  static const String brandInsignia = 'ZB';
+  static const String brandTagline = "Pakistan's Premier Verified Marketplace";
   static const String currency = 'PKR';
   static const String currencySymbol = 'Rs ';
   

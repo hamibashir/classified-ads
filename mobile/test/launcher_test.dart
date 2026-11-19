@@ -33,7 +33,7 @@ void main() {
       expect(uri.host, 'wa.me');
       expect(uri.path, '/923001234567');
       expect(uri.queryParameters['text'], contains('Honda Civic 2020'));
-      expect(uri.queryParameters['text'], contains('Classified Ads PK'));
+      expect(uri.queryParameters['text'], contains('Zaaz B'));
     });
   });
 }

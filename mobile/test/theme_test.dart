@@ -7,23 +7,23 @@ void main() {
   test('AppTheme light theme contains valid tokens and extensions', () {
     final theme = AppTheme.lightTheme;
     expect(theme.useMaterial3, isTrue);
-    expect(theme.colorScheme.primary, const Color(0xFF0F766E)); // Teal 700
-    expect(theme.scaffoldBackgroundColor, const Color(0xFFF8FAFC)); // Slate 50
+    expect(theme.colorScheme.primary, AppColors.primaryLight);
+    expect(theme.scaffoldBackgroundColor, AppColors.backgroundLight);
 
     final marketplace = theme.extension<MarketplaceColors>();
     expect(marketplace, isNotNull);
-    expect(marketplace!.priceColor, const Color(0xFF047857)); // Emerald 700
-    expect(marketplace.whatsappColor, const Color(0xFF25D366)); // WhatsApp green
+    expect(marketplace!.priceColor, AppColors.priceLight);
+    expect(marketplace.whatsappColor, AppColors.whatsapp);
   });
 
   test('AppTheme dark theme contains valid tokens and extensions', () {
     final theme = AppTheme.darkTheme;
     expect(theme.useMaterial3, isTrue);
-    expect(theme.colorScheme.primary, const Color(0xFF14B8A6)); // Teal 500
-    expect(theme.scaffoldBackgroundColor, const Color(0xFF0B0F17)); // Deep Slate
+    expect(theme.colorScheme.primary, AppColors.primaryDark);
+    expect(theme.scaffoldBackgroundColor, AppColors.backgroundDark);
 
     final marketplace = theme.extension<MarketplaceColors>();
     expect(marketplace, isNotNull);
-    expect(marketplace!.priceColor, const Color(0xFF10B981)); // Emerald 500
+    expect(marketplace!.priceColor, AppColors.priceDark);
   });
 }

@@ -33,12 +33,19 @@ class MobileAdCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12.0),
+      borderRadius: BorderRadius.circular(14.0),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.cardLight,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(14.0),
           border: Border.all(color: AppColors.borderLight, width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4.0,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -211,6 +218,14 @@ class MobileAdCard extends StatelessWidget {
                           color: AppColors.mutedForegroundLight,
                         ),
                       ),
+                      if (ad.seller?.isPhoneVerified == true) ...[
+                        const SizedBox(width: 4.0),
+                        const Icon(
+                          Icons.verified,
+                          size: 13.0,
+                          color: AppColors.primaryLight,
+                        ),
+                      ],
                     ],
                   ),
                 ],

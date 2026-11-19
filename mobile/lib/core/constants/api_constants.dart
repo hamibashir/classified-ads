@@ -1,30 +1,16 @@
-import 'package:flutter/foundation.dart';
-
 class ApiConstants {
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
   static const String _envSocketUrl = String.fromEnvironment('SOCKET_URL');
 
-  // Automatically resolves host based on platform:
-  // - Flutter Web: http://localhost:5000/api/v1
-  // - Android Emulator: http://10.0.2.2:5000/api/v1
-  // - iOS / Desktop: http://localhost:5000/api/v1
-  // - Explicit override: via --dart-define=API_BASE_URL=...
+  // Production Zaaz B API endpoints (override with --dart-define=API_BASE_URL=... for local dev)
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
-    if (kIsWeb) return 'http://localhost:5000/api/v1';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:5000/api/v1';
-    }
-    return 'http://localhost:5000/api/v1';
+    return 'https://api.zaazb.com/api/v1';
   }
 
   static String get socketUrl {
     if (_envSocketUrl.isNotEmpty) return _envSocketUrl;
-    if (kIsWeb) return 'http://localhost:5000';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:5000';
-    }
-    return 'http://localhost:5000';
+    return 'https://api.zaazb.com';
   }
 
   // Authentication endpoints
@@ -42,6 +28,8 @@ class ApiConstants {
 
   // Chat endpoints
   static const String conversations = '/chat/conversations';
+  static String conversation(String id) => '/chat/conversations/$id';
+  static String conversationMessages(String id) => '/chat/conversations/$id/messages';
 
   // User endpoints
   static const String myAds = '/ads/my';
