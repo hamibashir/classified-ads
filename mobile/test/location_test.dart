@@ -28,10 +28,10 @@ void main() {
       expect(parsed.latitude, 33.6844);
       expect(parsed.longitude, 73.0479);
       expect(parsed.isGps, isFalse);
-      expect(parsed.displayName, '📍 Islamabad');
+      expect(parsed.displayName, 'Islamabad');
     });
 
-    test('displays "📍 Near Me" when isGps is true', () {
+    test('displays "Near Me" when isGps is true', () {
       const gpsLocation = UserLocation(
         cityName: 'Nearby',
         province: 'Pakistan',
@@ -40,7 +40,7 @@ void main() {
         isGps: true,
       );
 
-      expect(gpsLocation.displayName, '📍 Near Me');
+      expect(gpsLocation.displayName, 'Near Me');
     });
 
     test('contains 13 pre-seeded Pakistani cities', () {
@@ -55,10 +55,10 @@ void main() {
   });
 
   group('LocationProvider Tests', () {
-    test('initializes with default Lahore location', () {
+    test('initializes with default All Pakistan location', () {
       final provider = LocationProvider();
-      expect(provider.currentLocation.cityName, 'Lahore');
-      expect(provider.currentLocation.province, 'Punjab');
+      expect(provider.currentLocation.isAllPakistan, isTrue);
+      expect(provider.currentLocation.cityName, 'All Pakistan');
       expect(provider.isLoading, isFalse);
     });
 

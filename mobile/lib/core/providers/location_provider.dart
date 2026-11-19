@@ -71,6 +71,13 @@ class LocationProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> selectAllPakistan() async {
+    _currentLocation = UserLocation.allPakistan;
+    _errorMessage = null;
+    await _saveLocationToPrefs(_currentLocation);
+    notifyListeners();
+  }
+
   Future<void> selectCity(CityInfo city) async {
     _currentLocation = UserLocation(
       cityName: city.name,

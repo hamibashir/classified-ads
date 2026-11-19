@@ -108,6 +108,11 @@ class AppTheme {
           );
         }),
       ),
+      scrollbarTheme: const ScrollbarThemeData(
+        thumbVisibility: WidgetStatePropertyAll(false),
+        trackVisibility: WidgetStatePropertyAll(false),
+        thickness: WidgetStatePropertyAll(0),
+      ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderLight,
         thickness: 1.0,
@@ -223,6 +228,11 @@ class AppTheme {
             color: AppColors.mutedForegroundDark,
           );
         }),
+      ),
+      scrollbarTheme: const ScrollbarThemeData(
+        thumbVisibility: WidgetStatePropertyAll(false),
+        trackVisibility: WidgetStatePropertyAll(false),
+        thickness: WidgetStatePropertyAll(0),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderDark,

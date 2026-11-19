@@ -34,7 +34,15 @@ class AuthProvider extends ChangeNotifier {
 
     final response = await _apiClient.get<UserModel>(
       ApiConstants.me,
-      fromJsonT: (data) => UserModel.fromJson(data as Map<String, dynamic>),
+      fromJsonT: (data) {
+        if (data is Map<String, dynamic>) {
+          if (data['user'] is Map<String, dynamic>) {
+            return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+          }
+          return UserModel.fromJson(data);
+        }
+        throw Exception('Invalid user format');
+      },
     );
 
     if (response.success && response.data != null) {
@@ -68,14 +76,15 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.success && response.data != null) {
       final data = response.data!;
-      final accessToken = data['accessToken']?.toString();
-      final refreshToken = data['refreshToken']?.toString();
-      final userData = data['user'] as Map<String, dynamic>?;
+      final tokens = data['tokens'] is Map ? data['tokens'] as Map<String, dynamic> : null;
+      final accessToken = (tokens?['accessToken'] ?? data['accessToken'])?.toString();
+      final refreshToken = (tokens?['refreshToken'] ?? data['refreshToken'])?.toString();
+      final userData = (data['user'] is Map ? data['user'] : data) as Map<String, dynamic>?;
 
-      if (accessToken != null && refreshToken != null && userData != null) {
+      if (accessToken != null && accessToken.isNotEmpty && userData != null) {
         await _tokenStorage.saveTokens(
           accessToken: accessToken,
-          refreshToken: refreshToken,
+          refreshToken: refreshToken ?? '',
         );
         _user = UserModel.fromJson(userData);
         _isLoading = false;
@@ -118,14 +127,15 @@ class AuthProvider extends ChangeNotifier {
 
     if (response.success && response.data != null) {
       final data = response.data!;
-      final accessToken = data['accessToken']?.toString();
-      final refreshToken = data['refreshToken']?.toString();
-      final userData = data['user'] as Map<String, dynamic>?;
+      final tokens = data['tokens'] is Map ? data['tokens'] as Map<String, dynamic> : null;
+      final accessToken = (tokens?['accessToken'] ?? data['accessToken'])?.toString();
+      final refreshToken = (tokens?['refreshToken'] ?? data['refreshToken'])?.toString();
+      final userData = (data['user'] is Map ? data['user'] : data) as Map<String, dynamic>?;
 
-      if (accessToken != null && refreshToken != null && userData != null) {
+      if (accessToken != null && accessToken.isNotEmpty && userData != null) {
         await _tokenStorage.saveTokens(
           accessToken: accessToken,
-          refreshToken: refreshToken,
+          refreshToken: refreshToken ?? '',
         );
         _user = UserModel.fromJson(userData);
         _isLoading = false;
@@ -144,7 +154,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _tokenStorage.clearTokens();
     _user = null;
-    _errorMessage = null;
     notifyListeners();
   }
 }

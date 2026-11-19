@@ -25,8 +25,10 @@ import {
 } from 'lucide-react';
 import { POPULAR_CATEGORIES } from '@/constants/categories';
 import { PAKISTANI_CITIES } from '@/constants/cities';
+import { getFilterableFieldsForCategory } from '@/constants/categoryFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SlidersHorizontal } from 'lucide-react';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Car,
@@ -57,12 +59,14 @@ interface FilterSidebarProps {
   minPrice?: string;
   maxPrice?: string;
   condition?: string;
+  customFilters?: Record<string, string>;
   onCategoryChange?: (slug: string) => void;
   onSubcategoryChange?: (subcatSlug: string) => void;
   onCategorySelect?: (categorySlug: string, subcategorySlug?: string | null) => void;
   onCityChange: (cityId: string) => void;
   onPriceChange: (min: string, max: string) => void;
   onConditionChange: (condition: string) => void;
+  onCustomFilterChange?: (key: string, value: string) => void;
   onClearFilters: () => void;
   className?: string;
 }
@@ -74,17 +78,21 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   minPrice = '',
   maxPrice = '',
   condition = '',
+  customFilters = {},
   onCategoryChange,
   onSubcategoryChange,
   onCategorySelect,
   onCityChange,
   onPriceChange,
   onConditionChange,
+  onCustomFilterChange,
   onClearFilters,
   className = '',
 }) => {
   const [localMin, setLocalMin] = useState<string>(minPrice);
   const [localMax, setLocalMax] = useState<string>(maxPrice);
+
+  const filterableFields = getFilterableFieldsForCategory(selectedCategory || selectedSubcategory);
 
   const handleCategoryAction = (catSlug: string, subcatSlug?: string | null) => {
     if (onCategorySelect) {
@@ -306,6 +314,55 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           })}
         </div>
       </div>
+
+      {/* Category Specifications Filters (Auto-updated by selected category) */}
+      {filterableFields.length > 0 && (
+        <div className="space-y-3 pt-3 border-t border-border/60">
+          <div className="flex items-center justify-between">
+            <h4 className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Specifications</span>
+            </h4>
+            {Object.keys(customFilters).length > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">
+                {Object.keys(customFilters).length} active
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {filterableFields.map((field) => {
+              const activeVal = customFilters[field.key] || '';
+              return (
+                <div key={field.key} className="space-y-1.5">
+                  <span className="text-[11px] font-medium text-foreground block">
+                    {field.label}
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {field.options?.map((opt) => {
+                      const isSelected = activeVal === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => onCustomFilterChange?.(field.key, isSelected ? '' : opt)}
+                          className={`py-1 px-2 text-[10px] font-medium rounded-lg border transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-emerald-900 text-white dark:bg-emerald-500 dark:text-zinc-950 border-transparent shadow-xs font-semibold'
+                              : 'bg-card text-muted-foreground border-border/80 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-foreground'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 2. City / Location Filter */}
       <div className="space-y-2.5 pt-3 border-t border-border/60">

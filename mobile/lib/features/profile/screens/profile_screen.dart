@@ -4,6 +4,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../admin/screens/admin_dashboard_screen.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../auth/screens/register_screen.dart';
 import 'my_ads_screen.dart';
@@ -114,11 +115,36 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            user.name,
-                            style: AppTextStyles.h2,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  user.name,
+                                  style: AppTextStyles.h2,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (user.isAdmin) ...[
+                                const SizedBox(width: 8.0),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF064E3B),
+                                    borderRadius: BorderRadius.circular(4.0),
+                                  ),
+                                  child: const Text(
+                                    'ADMIN',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10.0,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 2.0),
                           Text(
@@ -161,6 +187,19 @@ class ProfileScreen extends StatelessWidget {
 
             // Profile Menu List
             if (authProvider.isAuthenticated) ...[
+              if (user?.isAdmin == true) ...[
+                _buildMenuItem(
+                  icon: Icons.admin_panel_settings_outlined,
+                  title: 'Admin Console',
+                  subtitle: 'Metrics, Moderation Queue & Categories',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8.0),
+              ],
               _buildMenuItem(
                 icon: Icons.list_alt_outlined,
                 title: 'My Listings',

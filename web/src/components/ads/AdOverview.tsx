@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Cpu,
   Car,
-  Smartphone,
   Wrench,
   Info,
   FileText,
@@ -23,6 +22,12 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Fuel,
+  Gauge,
+  Bed,
+  Bath,
+  Maximize2,
+  LucideIcon,
 } from 'lucide-react';
 import { AdListItem } from '@/types/ad';
 import { formatPKR, formatRelativeTime } from '@/lib/formatters';
@@ -80,86 +85,118 @@ function extractListingSpecs(ad: AdListItem): SpecItem[] {
     icon: MapPin,
   });
 
-  const fullText = `${ad.title} ${ad.description || ''}`;
-
-  // 4. Detected Brand / Make
-  const knownBrands = [
-    'Toyota', 'Honda', 'Suzuki', 'Hyundai', 'Kia', 'Changan', 'Nissan', 'Daihatsu', 'Audi', 'BMW', 'Mercedes',
-    'Apple', 'Samsung', 'Xiaomi', 'Redmi', 'Infinix', 'Tecno', 'Oppo', 'Vivo', 'Realme', 'OnePlus', 'Google Pixel',
-    'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MacBook', 'Sony', 'Canon', 'Nikon',
-    'Haier', 'Gree', 'Dawlance', 'Pel', 'Waves', 'Kenwood', 'Orient'
-  ];
-  const matchedBrand = knownBrands.find((b) =>
-    new RegExp(`\\b${b}\\b`, 'i').test(fullText)
-  );
-  if (matchedBrand) {
-    const isVehicle =
-      (ad.category?.slug || '').includes('motor') ||
-      (ad.category?.slug || '').includes('vehicle') ||
-      (ad.category?.slug || '').includes('car');
-    specs.push({
-      label: isVehicle ? 'Make / Brand' : 'Brand',
-      value: matchedBrand,
-      icon: isVehicle ? Car : Smartphone,
-    });
-  }
-
-  // 5. Model Year (e.g. 1990 - 2026)
-  const yearMatch = fullText.match(/\b(199\d|20[0-2]\d)\b/);
-  if (yearMatch) {
-    specs.push({
-      label: 'Model / Year',
-      value: yearMatch[1],
-      icon: Calendar,
-    });
-  }
-
-  // 6. PTA Status (for mobile phones)
-  if (/(pta\s*approved|official\s*pta)/i.test(fullText)) {
-    specs.push({
-      label: 'PTA Status',
-      value: 'PTA Approved (Official)',
-      icon: ShieldCheck,
-    });
-  } else if (/(non[- ]?pta|jv\s*sim)/i.test(fullText)) {
-    specs.push({
-      label: 'PTA Status',
-      value: 'Non-PTA / JV',
-      icon: Info,
-    });
-  }
-
-  // 7. Fuel / Transmission (for vehicles)
-  if (/automatic/i.test(fullText)) {
-    specs.push({
-      label: 'Transmission',
-      value: 'Automatic',
-      icon: Wrench,
-    });
-  } else if (/manual/i.test(fullText)) {
-    specs.push({
-      label: 'Transmission',
-      value: 'Manual',
-      icon: Wrench,
-    });
-  }
-
-  // 8. Storage / RAM (for electronics / phones)
-  const storageMatch = fullText.match(/\b(64|128|256|512)\s*GB\b/i) || fullText.match(/\b(1|2)\s*TB\b/i);
-  if (storageMatch) {
-    specs.push({
-      label: 'Storage',
-      value: storageMatch[0].toUpperCase(),
-      icon: Cpu,
-    });
-  }
-
-  // 9. Inspection / Authenticity Guarantee
+  // 4. Price Type
   specs.push({
-    label: 'Verification',
-    value: 'Physical Inspection Allowed',
-    icon: CheckCircle2,
+    label: 'Price Type',
+    value: ad.isNegotiable ? 'Negotiable' : 'Fixed Price',
+    icon: Tag,
   });
+
+  // 5. Listed Date
+  if (ad.createdAt) {
+    try {
+      const dateStr = new Date(ad.createdAt).toLocaleDateString('en-PK', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+      specs.push({
+        label: 'Listed Date',
+        value: dateStr,
+        icon: Calendar,
+      });
+    } catch {}
+  }
+
+  // 6. Parse structured specifications if present
+  let parsedSpecs: Record<string, string> = ad.customFields || {};
+  const rawDesc = ad.description || '';
+  const specMatch = rawDesc.match(/===SPECIFICATIONS===([\s\S]*?)====================/);
+  if (specMatch && specMatch[1]) {
+    try {
+      const jsonSpecs = JSON.parse(specMatch[1].trim());
+      parsedSpecs = { ...jsonSpecs, ...parsedSpecs };
+    } catch {}
+  }
+
+  // Append structured specifications with matching Lucide icons
+  Object.entries(parsedSpecs).forEach(([key, val]) => {
+    if (val && typeof val === 'string' && val.trim()) {
+      const formattedKey = key
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
+      const label = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+
+      let icon: LucideIcon = CheckCircle2;
+      const lower = key.toLowerCase();
+      if (lower.includes('make') || lower.includes('brand')) icon = Car;
+      else if (lower.includes('fuel')) icon = Fuel;
+      else if (lower.includes('trans')) icon = Wrench;
+      else if (lower.includes('mile')) icon = Gauge;
+      else if (lower.includes('year')) icon = Calendar;
+      else if (lower.includes('pta')) icon = ShieldCheck;
+      else if (lower.includes('ram') || lower.includes('storage')) icon = Cpu;
+      else if (lower.includes('bed') || lower.includes('room')) icon = Bed;
+      else if (lower.includes('bath')) icon = Bath;
+      else if (lower.includes('area') || lower.includes('size')) icon = Maximize2;
+
+      specs.push({
+        label,
+        value: val.trim(),
+        icon,
+      });
+    }
+  });
+
+  // 7. Heuristic fallback for older listings without structured specifications
+  if (Object.keys(parsedSpecs).length === 0) {
+    const fullText = `${ad.title} ${ad.description || ''}`;
+    const knownBrands = [
+      'Toyota', 'Honda', 'Suzuki', 'Hyundai', 'Kia', 'Changan', 'Nissan', 'Daihatsu', 'Audi', 'BMW', 'Mercedes',
+      'Apple', 'Samsung', 'Xiaomi', 'Redmi', 'Infinix', 'Tecno', 'Oppo', 'Vivo', 'Realme', 'OnePlus', 'Google Pixel',
+      'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'MacBook', 'Sony', 'Canon', 'Nikon',
+      'Haier', 'Gree', 'Dawlance', 'Pel', 'Waves', 'Kenwood', 'Orient'
+    ];
+    const matchedBrand = knownBrands.find((b) =>
+      new RegExp(`\\b${b}\\b`, 'i').test(fullText)
+    );
+    if (matchedBrand) {
+      specs.push({
+        label: 'Brand / Make',
+        value: matchedBrand,
+        icon: Car,
+      });
+    }
+
+    const yearMatch = fullText.match(/\b(199\d|20[0-2]\d)\b/);
+    if (yearMatch) {
+      specs.push({
+        label: 'Model / Year',
+        value: yearMatch[1],
+        icon: Calendar,
+      });
+    }
+
+    if (/(pta\s*approved|official\s*pta)/i.test(fullText)) {
+      specs.push({
+        label: 'PTA Status',
+        value: 'PTA Approved',
+        icon: ShieldCheck,
+      });
+    } else if (/(non[- ]?pta|jv\s*sim)/i.test(fullText)) {
+      specs.push({
+        label: 'PTA Status',
+        value: 'Non-PTA / JV',
+        icon: Info,
+      });
+    }
+
+    if (/automatic/i.test(fullText)) {
+      specs.push({ label: 'Transmission', value: 'Automatic', icon: Wrench });
+    } else if (/manual/i.test(fullText)) {
+      specs.push({ label: 'Transmission', value: 'Manual', icon: Wrench });
+    }
+  }
 
   return specs;
 }
@@ -171,20 +208,25 @@ function EnhancedDescription({ description }: { description: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const lines = useMemo(() => {
-    return description.split('\n');
+  // Strip machine specifications block from buyer-facing description
+  const cleanDescription = useMemo(() => {
+    return description.replace(/===SPECIFICATIONS===[\s\S]*?====================/g, '').trim();
   }, [description]);
+
+  const lines = useMemo(() => {
+    return cleanDescription.split('\n');
+  }, [cleanDescription]);
 
   const wordsCount = useMemo(() => {
-    return description.trim().split(/\s+/).filter(Boolean).length;
-  }, [description]);
+    return cleanDescription.trim().split(/\s+/).filter(Boolean).length;
+  }, [cleanDescription]);
 
   const readTimeMin = Math.max(1, Math.ceil(wordsCount / 180));
-  const isLong = description.length > 500 || lines.length > 9;
+  const isLong = cleanDescription.length > 500 || lines.length > 9;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(description);
+      await navigator.clipboard.writeText(cleanDescription);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -438,29 +480,29 @@ export const AdOverview: React.FC<AdOverviewProps> = ({ ad, onFavoriteToggle }) 
           </span>
         </div>
 
-        {/* Specs Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {/* Vertical Minimal Modern Specifications List */}
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 divide-y divide-slate-100 overflow-hidden">
           {specs.map((spec, idx) => {
             const IconComponent = spec.icon;
             return (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-slate-50/80 border border-slate-100/90 hover:bg-slate-50 transition-colors flex items-start gap-2.5"
+                className="px-4 py-3 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
               >
-                <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-teal-700 shrink-0 mt-0.5 shadow-2xs">
-                  <IconComponent className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700 shrink-0">
+                    <IconComponent className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-medium text-slate-500 truncate">
                     {spec.label}
                   </span>
-                  <span
-                    className="text-xs font-bold text-slate-800 truncate block"
-                    title={spec.value}
-                  >
-                    {spec.value}
-                  </span>
                 </div>
+                <span
+                  className="text-xs sm:text-sm font-bold text-slate-900 text-right truncate max-w-[55%]"
+                  title={spec.value}
+                >
+                  {spec.value}
+                </span>
               </div>
             );
           })}

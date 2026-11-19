@@ -122,9 +122,14 @@ export function PostAdStepReview({
     try {
       const targetCategoryId = await resolveCategoryUuid();
 
+      let finalDescription = draft.description.trim();
+      if (draft.customFields && Object.keys(draft.customFields).length > 0) {
+        finalDescription += `\n\n===SPECIFICATIONS===\n${JSON.stringify(draft.customFields)}\n====================\n`;
+      }
+
       const payload = {
         title: draft.title.trim(),
-        description: draft.description.trim(),
+        description: finalDescription,
         categoryId: targetCategoryId,
         price: Number(draft.price) || 0,
         currency: 'PKR',
@@ -142,6 +147,7 @@ export function PostAdStepReview({
           publicId: img.publicId || null,
           order: typeof img.order === 'number' ? img.order : idx,
         })),
+        customFields: draft.customFields || {},
       };
 
       const response = await apiClient.post<CreatedAdResponse>('/ads', payload);

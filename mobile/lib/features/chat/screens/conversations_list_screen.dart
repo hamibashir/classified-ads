@@ -5,6 +5,7 @@ import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/chat_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/shimmer_box.dart';
 import '../../auth/screens/login_screen.dart';
 import 'chat_screen.dart';
 
@@ -88,7 +89,22 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
         title: const Text('Messages'),
       ),
       body: chatProvider.isLoadingConversations && chatProvider.conversations.isEmpty
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primaryLight))
+          ? ShimmerEffect(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                itemCount: 6,
+                separatorBuilder: (context, index) => const Divider(height: 1.0),
+                itemBuilder: (context, index) => const ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  leading: ShimmerBox(width: 48, height: 48, shape: BoxShape.circle),
+                  title: ShimmerBox(width: 140, height: 16, borderRadius: 4.0),
+                  subtitle: Padding(
+                    padding: EdgeInsets.only(top: 6.0),
+                    child: ShimmerBox(width: double.infinity, height: 12, borderRadius: 3.0),
+                  ),
+                ),
+              ),
+            )
           : RefreshIndicator(
               color: AppColors.primaryLight,
               onRefresh: chatProvider.fetchConversations,

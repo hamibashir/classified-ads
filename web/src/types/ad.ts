@@ -19,6 +19,7 @@ export interface PostAdDraft {
   currency: string;
   isNegotiable: boolean;
   condition: AdCondition;
+  customFields?: Record<string, string>;
 
   // Step 3: Photos (Upcoming Task 9.3)
   images: { url: string; order: number; publicId?: string | null }[];
@@ -88,6 +89,7 @@ export interface AdListItem {
   seller?: AdSeller;
   isFavorited?: boolean;
   isFeatured?: boolean;
+  customFields?: Record<string, string>;
 }
 
 export type ReportReason =

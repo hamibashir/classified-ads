@@ -8,6 +8,8 @@ import {
   CONDITION_OPTIONS,
 } from '@/lib/validations/ad';
 import { formatPKR, formatCompactPKR } from '@/lib/formatters';
+import { getFieldsForCategory } from '@/constants/categoryFields';
+import { POPULAR_CATEGORIES } from '@/constants/categories';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -18,6 +20,7 @@ import {
   Info,
   FolderTree,
   Tag,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 interface PostAdStepDetailsProps {
@@ -44,6 +47,26 @@ export function PostAdStepDetails({
         ? 'USED_GOOD'
         : draft.condition || 'USED_GOOD',
   });
+
+  const [customValues, setCustomValues] = useState<Record<string, string>>(
+    draft.customFields || {}
+  );
+
+  const matchedCat = POPULAR_CATEGORIES.find(
+    (c) =>
+      c.id === draft.categoryId ||
+      c.slug === draft.categoryId ||
+      c.name.toLowerCase() === (draft.categoryName || '').toLowerCase()
+  );
+  const categorySlug = matchedCat?.slug || draft.categoryId || draft.categoryName || '';
+  const customFields = getFieldsForCategory(categorySlug);
+
+  const handleCustomFieldChange = (key: string, value: string) => {
+    const updated = { ...customValues, [key]: value };
+    if (!value) delete updated[key];
+    setCustomValues(updated);
+    onUpdateDraft({ customFields: updated });
+  };
 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof PostAdStep2Input, string>>>({});
 
@@ -301,7 +324,63 @@ export function PostAdStepDetails({
         </div>
       </div>
 
-      {/* 4. Description */}
+      {/* 4. Dynamic Category Specifications */}
+      {customFields.length > 0 && (
+        <div className="bg-card p-5 sm:p-6 rounded-2xl border border-border/80 space-y-4">
+          <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <SlidersHorizontal className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+                {draft.categoryName || 'Category'} Specifications
+              </h3>
+              <p className="text-[11px] text-muted-foreground">
+                Provide specific details to attract authentic buyers faster.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {customFields.map((field) => {
+              const IconComp = field.icon;
+              const val = customValues[field.key] || '';
+              return (
+                <div key={field.key} className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <IconComp className="w-3.5 h-3.5 text-primary" />
+                    <span>{field.label}</span>
+                  </label>
+                  {field.type === 'select' && field.options ? (
+                    <select
+                      value={val}
+                      onChange={(e) => handleCustomFieldChange(field.key, e.target.value)}
+                      className="w-full h-10 px-3 text-xs sm:text-sm rounded-xl border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
+                    >
+                      <option value="">Select {field.label}</option>
+                      {field.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      type={field.type === 'number' ? 'number' : 'text'}
+                      value={val}
+                      onChange={(e) => handleCustomFieldChange(field.key, e.target.value)}
+                      placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                      className="h-10 text-xs sm:text-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 5. Description */}
       <div className="bg-card p-5 sm:p-6 rounded-2xl border border-border/80 space-y-2">
         <div className="flex items-center justify-between">
           <label htmlFor="ad-description" className="block text-xs font-bold uppercase tracking-wider text-foreground">

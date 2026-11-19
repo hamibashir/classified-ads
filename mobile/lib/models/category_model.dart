@@ -32,9 +32,10 @@ class CategoryModel {
               .map((c) => CategoryModel.fromJson(c as Map<String, dynamic>))
               .toList()
           : const [],
-      adsCount: json['_count'] is Map && json['_count']['ads'] is num
-          ? (json['_count']['ads'] as num).toInt()
-          : 0,
+      adsCount: (json['adCount'] as num?)?.toInt() ??
+          (json['_count'] is Map && json['_count']['ads'] is num
+              ? (json['_count']['ads'] as num).toInt()
+              : 0),
     );
   }
 

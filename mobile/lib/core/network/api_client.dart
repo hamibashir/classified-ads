@@ -227,7 +227,7 @@ class ApiClient {
             'images',
             await MultipartFile.fromFile(
               file.path,
-              filename: file.path.split(Platform.pathSeparator).last,
+              filename: file.path.split(RegExp(r'[\\/]')).last,
             ),
           ),
         );

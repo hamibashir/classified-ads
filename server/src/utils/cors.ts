@@ -10,8 +10,8 @@ export const isOriginAllowed = (
   // Allow requests without Origin header (mobile native apps, curl, server-to-server)
   if (!origin) return true;
 
-  // In development, allow any local loopback origin
-  if (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+  // Allow local loopback origin (for local frontend & Flutter web testing)
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
     return true;
   }
 

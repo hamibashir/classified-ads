@@ -45,6 +45,21 @@ function SearchContainer() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // Read all custom spec filters from URL (prefixed with spec_)
+  const customFilters = useMemo(() => {
+    const filters: Record<string, string> = {};
+    searchParams.forEach((val, key) => {
+      if (key.startsWith('spec_') && val) {
+        filters[key.replace('spec_', '')] = val;
+      }
+    });
+    return filters;
+  }, [searchParams]);
+
+  const handleCustomFilterChange = (key: string, value: string) => {
+    updateUrlParams({ [`spec_${key}`]: value || null });
+  };
+
   // Helper to push new query string cleanly
   const updateUrlParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -107,11 +122,45 @@ function SearchContainer() {
         params,
       });
 
-      const items: AdListItem[] = Array.isArray(response)
+      let items: AdListItem[] = Array.isArray(response)
         ? response
         : Array.isArray((response as { data?: AdListItem[] })?.data)
         ? (response as { data: AdListItem[] }).data
         : (response as { ads?: AdListItem[] }).ads || [];
+
+      // Filter by custom specifications if active
+      if (Object.keys(customFilters).length > 0) {
+        items = items.filter((ad) => {
+          const rawDesc = ad.description || '';
+          let adSpecs: Record<string, string> = ad.customFields || {};
+          const match = rawDesc.match(/===SPECIFICATIONS===([\s\S]*?)====================/);
+          if (match && match[1]) {
+            try {
+              adSpecs = { ...JSON.parse(match[1]), ...adSpecs };
+            } catch {}
+          }
+          for (const [fKey, fVal] of Object.entries(customFilters)) {
+            const lowKey = fKey.toLowerCase();
+            const lowVal = fVal.toLowerCase();
+            let matched = false;
+            for (const [sKey, sVal] of Object.entries(adSpecs)) {
+              if (sKey.toLowerCase().includes(lowKey) || lowKey.includes(sKey.toLowerCase())) {
+                if (String(sVal).toLowerCase() === lowVal || String(sVal).toLowerCase().includes(lowVal)) {
+                  matched = true;
+                  break;
+                }
+              }
+            }
+            if (!matched) {
+              if (ad.title.toLowerCase().includes(lowVal) || rawDesc.toLowerCase().includes(lowVal)) {
+                matched = true;
+              }
+            }
+            if (!matched) return false;
+          }
+          return true;
+        });
+      }
 
       if (items.length > 0) {
         setAds(items);
@@ -257,7 +306,7 @@ function SearchContainer() {
     } finally {
       setLoading(false);
     }
-  }, [query, category, subcat, city, radius, minPrice, maxPrice, condition, sort]);
+  }, [query, category, subcat, city, radius, minPrice, maxPrice, condition, sort, customFilters]);
 
   useEffect(() => {
     fetchAds();
@@ -274,8 +323,9 @@ function SearchContainer() {
       maxPrice,
       condition,
       sort,
+      ...customFilters,
     }),
-    [query, category, subcat, city, radius, minPrice, maxPrice, condition, sort]
+    [query, category, subcat, city, radius, minPrice, maxPrice, condition, sort, customFilters]
   );
 
   return (
@@ -327,12 +377,14 @@ function SearchContainer() {
               minPrice={minPrice}
               maxPrice={maxPrice}
               condition={condition}
+              customFilters={customFilters}
               onCategorySelect={handleCategorySelect}
               onCityChange={(c) => updateUrlParams({ city: c })}
               onPriceChange={(min, max) =>
                 updateUrlParams({ minPrice: min || null, maxPrice: max || null })
               }
               onConditionChange={(cond) => updateUrlParams({ condition: cond || null })}
+              onCustomFilterChange={handleCustomFilterChange}
               onClearFilters={handleClearAllFilters}
             />
           </div>
@@ -355,12 +407,14 @@ function SearchContainer() {
                   minPrice={minPrice}
                   maxPrice={maxPrice}
                   condition={condition}
+                  customFilters={customFilters}
                   onCategorySelect={handleCategorySelect}
                   onCityChange={(c) => updateUrlParams({ city: c })}
                   onPriceChange={(min, max) =>
                     updateUrlParams({ minPrice: min || null, maxPrice: max || null })
                   }
                   onConditionChange={(cond) => updateUrlParams({ condition: cond || null })}
+                  onCustomFilterChange={handleCustomFilterChange}
                   onClearFilters={handleClearAllFilters}
                 />
               }

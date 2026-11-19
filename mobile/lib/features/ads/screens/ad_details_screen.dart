@@ -9,8 +9,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/launcher_utils.dart';
 import '../../../models/ad_model.dart';
+import '../../../core/widgets/shimmer_box.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../chat/screens/chat_screen.dart';
+import '../widgets/ad_details_skeleton.dart';
 import '../widgets/mobile_ad_card.dart';
 import '../widgets/report_ad_bottom_sheet.dart';
 
@@ -117,12 +119,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.backgroundLight,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.primaryLight),
-        ),
-      );
+      return const AdDetailsSkeleton();
     }
 
     if (_errorMessage != null || _ad == null) {
@@ -150,6 +147,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
     }
 
     final ad = _ad!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final marketplace = Theme.of(context).extension<MarketplaceColors>();
 
     return Scaffold(
@@ -166,6 +164,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
               color: ad.isFavorite ? AppColors.destructive : AppColors.foregroundLight,
             ),
             onPressed: () {
+              HapticFeedback.lightImpact();
               setState(() {
                 _ad = ad.copyWith(isFavorite: !ad.isFavorite);
               });
@@ -216,6 +215,14 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                             return Image.network(
                               ad.images[index],
                               fit: BoxFit.cover,
+                              cacheWidth: 900,
+                              cacheHeight: 675,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const ShimmerEffect(
+                                  child: ShimmerBox(borderRadius: 0),
+                                );
+                              },
                               errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
                             );
                           },
@@ -265,19 +272,37 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                       ),
                       if (ad.isNegotiable)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.5),
                           decoration: BoxDecoration(
-                            color: AppColors.mutedLight,
-                            borderRadius: BorderRadius.circular(6.0),
-                            border: Border.all(color: AppColors.borderLight),
-                          ),
-                          child: const Text(
-                            'Negotiable',
-                            style: TextStyle(
-                              color: AppColors.mutedForegroundLight,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12.0,
+                            color: isDark
+                                ? const Color(0xFF064E3B).withValues(alpha: 0.45)
+                                : const Color(0xFFECFDF5),
+                            borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF059669).withValues(alpha: 0.45)
+                                  : const Color(0xFFA7F3D0),
+                              width: 1.0,
                             ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.handshake_outlined,
+                                size: 14.0,
+                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                'Negotiable',
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF047857),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],
@@ -324,73 +349,10 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                   const Divider(),
                   const SizedBox(height: 16.0),
 
-                  // Specifications Grid
+                  // Specifications (Vertical Minimal Modern List)
                   const Text('Overview & Specifications', style: AppTextStyles.h3),
                   const SizedBox(height: 10.0),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.cardLight,
-                      borderRadius: BorderRadius.circular(14.0),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildSpecRow('Condition', ad.conditionLabel, Icons.verified_outlined, isTop: true),
-                        const Divider(height: 1.0, color: AppColors.borderLight),
-                        _buildSpecRow('Category', ad.category?.name ?? 'General', Icons.category_outlined),
-                        const Divider(height: 1.0, color: AppColors.borderLight),
-                        _buildSpecRow('City', ad.locationCity, Icons.location_city_outlined),
-                        if (ad.locationAddress != null && ad.locationAddress!.isNotEmpty) ...[
-                          const Divider(height: 1.0, color: AppColors.borderLight),
-                          _buildSpecRow('Area / Address', ad.locationAddress!, Icons.map_outlined),
-                        ],
-                        const Divider(height: 1.0, color: AppColors.borderLight),
-                        _buildSpecRow('Price', ad.isNegotiable ? 'Negotiable' : 'Fixed Price', Icons.sell_outlined, isBottom: true),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-
-                  // Buyer Inspection Tip Card
-                  Container(
-                    padding: const EdgeInsets.all(14.0),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.shield_outlined, size: 20.0, color: AppColors.primaryLight),
-                        const SizedBox(width: 10.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Buyer Inspection Tip',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryLight,
-                                ),
-                              ),
-                              SizedBox(height: 3.0),
-                              Text(
-                                'Always inspect the item in person in daylight before handing over payment. Never transfer advance deposits or down-payments.',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: AppColors.mutedForegroundLight,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildVerticalSpecsList(ad, isDark),
                   const SizedBox(height: 20.0),
 
                   // Description Header & Meta Stats
@@ -400,7 +362,9 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                       const Text('Description', style: AppTextStyles.h3),
                       InkWell(
                         onTap: () {
-                          Clipboard.setData(ClipboardData(text: ad.description));
+                          Clipboard.setData(ClipboardData(
+                            text: ad.cleanDescription.isNotEmpty ? ad.cleanDescription : ad.description,
+                          ));
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Description copied to clipboard'),
@@ -431,7 +395,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                   ),
                   const SizedBox(height: 4.0),
                   Text(
-                    '${ad.description.trim().split(RegExp(r'\s+')).length} words • ~${(ad.description.trim().split(RegExp(r'\s+')).length / 180).ceil()} min read',
+                    '${(ad.cleanDescription.isNotEmpty ? ad.cleanDescription : ad.description).trim().split(RegExp(r'\s+')).length} words • ~${((ad.cleanDescription.isNotEmpty ? ad.cleanDescription : ad.description).trim().split(RegExp(r'\s+')).length / 180).ceil()} min read',
                     style: const TextStyle(
                       fontSize: 11.5,
                       color: AppColors.mutedForegroundLight,
@@ -447,7 +411,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                       border: Border.all(color: AppColors.borderLight),
                     ),
                     child: Text(
-                      ad.description,
+                      ad.cleanDescription.isNotEmpty ? ad.cleanDescription : ad.description,
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.foregroundLight,
                         height: 1.5,
@@ -600,6 +564,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                 flex: 3,
                 child: ElevatedButton.icon(
                   onPressed: () async {
+                    HapticFeedback.lightImpact();
                     if (widget.onStartChat != null) {
                       widget.onStartChat!(ad.userId, ad.id, ad.title);
                       return;
@@ -639,6 +604,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () async {
+                      HapticFeedback.lightImpact();
                       await LauncherUtils.launchWhatsApp(
                         phone: ad.seller!.phone!,
                         adTitle: ad.title,
@@ -657,6 +623,7 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
                   flex: 2,
                   child: OutlinedButton(
                     onPressed: () async {
+                      HapticFeedback.lightImpact();
                       if (!_isPhoneRevealed) {
                         setState(() {
                           _isPhoneRevealed = true;
@@ -679,35 +646,138 @@ class _AdDetailsScreenState extends State<AdDetailsScreen> {
     );
   }
 
-  Widget _buildSpecRow(String label, String value, IconData icon, {bool isTop = false, bool isBottom = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 18.0, color: AppColors.primaryLight),
-          const SizedBox(width: 12.0),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13.0,
-              color: AppColors.mutedForegroundLight,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Spacer(),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13.0,
-                color: AppColors.foregroundLight,
-                fontWeight: FontWeight.w700,
+  Widget _buildVerticalSpecsList(AdModel ad, bool isDark) {
+    final List<Map<String, dynamic>> items = [
+      {'label': 'Condition', 'value': ad.conditionLabel, 'icon': Icons.verified_outlined},
+      {'label': 'Category', 'value': ad.category?.name ?? 'General', 'icon': Icons.category_outlined},
+      {'label': 'City', 'value': ad.locationCity, 'icon': Icons.location_city_outlined},
+      if (ad.locationAddress != null && ad.locationAddress!.isNotEmpty)
+        {'label': 'Area / Address', 'value': ad.locationAddress!, 'icon': Icons.map_outlined},
+      {'label': 'Price Type', 'value': ad.isNegotiable ? 'Negotiable' : 'Fixed Price', 'icon': Icons.sell_outlined},
+      {'label': 'Listed Date', 'value': DateFormat('dd MMM yyyy').format(ad.createdAt), 'icon': Icons.calendar_today_outlined},
+    ];
+
+    // Append category-specific custom fields
+    ad.customFields.forEach((key, val) {
+      if (val.trim().isNotEmpty) {
+        final formattedKey = key
+            .replaceAllMapped(RegExp(r'([A-Z])'), (m) => ' ${m.group(1)}')
+            .trim();
+        final label = formattedKey.isNotEmpty
+            ? formattedKey.substring(0, 1).toUpperCase() + formattedKey.substring(1)
+            : key;
+
+        IconData icon = Icons.tune;
+        final lower = key.toLowerCase();
+        if (lower.contains('make') || lower.contains('brand')) {
+          icon = Icons.directions_car_outlined;
+        } else if (lower.contains('fuel')) {
+          icon = Icons.local_gas_station_outlined;
+        } else if (lower.contains('trans')) {
+          icon = Icons.settings_suggest_outlined;
+        } else if (lower.contains('mile')) {
+          icon = Icons.speed_outlined;
+        } else if (lower.contains('year')) {
+          icon = Icons.calendar_today_outlined;
+        } else if (lower.contains('pta')) {
+          icon = Icons.verified_user_outlined;
+        } else if (lower.contains('ram') || lower.contains('storage')) {
+          icon = Icons.memory_outlined;
+        } else if (lower.contains('bed') || lower.contains('room')) {
+          icon = Icons.bed_outlined;
+        } else if (lower.contains('bath')) {
+          icon = Icons.bathtub_outlined;
+        } else if (lower.contains('area') || lower.contains('size')) {
+          icon = Icons.square_foot_outlined;
+        }
+
+        items.add({
+          'label': label,
+          'value': val,
+          'icon': icon,
+        });
+      }
+    });
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14.0),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : const Color(0xFFE2E8F0),
+          width: 1.0,
+        ),
+      ),
+      child: Column(
+        children: List.generate(items.length, (index) {
+          final item = items[index];
+          final isLast = index == items.length - 1;
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 11.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28.0,
+                      height: 28.0,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF064E3B).withValues(alpha: 0.3)
+                            : const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(7.0),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF059669).withValues(alpha: 0.3)
+                              : const Color(0xFFA7F3D0),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Icon(
+                        item['icon'] as IconData,
+                        size: 15.0,
+                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF047857),
+                      ),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      flex: 4,
+                      child: Text(
+                        item['label'] as String,
+                        style: TextStyle(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? AppColors.mutedForegroundDark : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        item['value'] as String,
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? AppColors.foregroundDark : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
+              if (!isLast)
+                Divider(
+                  height: 1.0,
+                  thickness: 0.8,
+                  color: isDark ? AppColors.borderDark : const Color(0xFFE2E8F0),
+                  indent: 14.0,
+                  endIndent: 14.0,
+                ),
+            ],
+          );
+        }),
       ),
     );
   }

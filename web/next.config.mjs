@@ -23,6 +23,16 @@ const nextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'https',
+        hostname: 'api.zaazb.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zaazb.com',
+        pathname: '/**',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         pathname: '/**',

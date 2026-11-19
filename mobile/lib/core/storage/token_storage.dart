@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenStorage {
   static const String _accessTokenKey = 'pk_access_token';
@@ -16,22 +17,51 @@ class TokenStorage {
     required String accessToken,
     required String refreshToken,
   }) async {
-    await Future.wait([
-      _storage.write(key: _accessTokenKey, value: accessToken),
-      _storage.write(key: _refreshTokenKey, value: refreshToken),
-    ]);
+    try {
+      await Future.wait([
+        _storage.write(key: _accessTokenKey, value: accessToken),
+        _storage.write(key: _refreshTokenKey, value: refreshToken),
+      ]);
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_accessTokenKey, accessToken);
+      await prefs.setString(_refreshTokenKey, refreshToken);
+    } catch (_) {}
   }
 
   Future<void> saveAccessToken(String accessToken) async {
-    await _storage.write(key: _accessTokenKey, value: accessToken);
+    try {
+      await _storage.write(key: _accessTokenKey, value: accessToken);
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_accessTokenKey, accessToken);
+    } catch (_) {}
   }
 
   Future<String?> getAccessToken() async {
-    return _storage.read(key: _accessTokenKey);
+    try {
+      final val = await _storage.read(key: _accessTokenKey);
+      if (val != null && val.isNotEmpty) return val;
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_accessTokenKey);
+    } catch (_) {}
+    return null;
   }
 
   Future<String?> getRefreshToken() async {
-    return _storage.read(key: _refreshTokenKey);
+    try {
+      final val = await _storage.read(key: _refreshTokenKey);
+      if (val != null && val.isNotEmpty) return val;
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_refreshTokenKey);
+    } catch (_) {}
+    return null;
   }
 
   Future<bool> hasAccessToken() async {
@@ -40,9 +70,16 @@ class TokenStorage {
   }
 
   Future<void> clearTokens() async {
-    await Future.wait([
-      _storage.delete(key: _accessTokenKey),
-      _storage.delete(key: _refreshTokenKey),
-    ]);
+    try {
+      await Future.wait([
+        _storage.delete(key: _accessTokenKey),
+        _storage.delete(key: _refreshTokenKey),
+      ]);
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_accessTokenKey);
+      await prefs.remove(_refreshTokenKey);
+    } catch (_) {}
   }
 }

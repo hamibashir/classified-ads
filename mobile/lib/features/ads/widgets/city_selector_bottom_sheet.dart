@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/location_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -106,6 +107,7 @@ class _CitySelectorBottomSheetState extends State<CitySelectorBottomSheet> {
               onTap: locationProvider.isLoading
                   ? null
                   : () async {
+                      HapticFeedback.lightImpact();
                       final success = await locationProvider.detectGpsLocation();
                       if (context.mounted) {
                         if (success) {
@@ -164,6 +166,51 @@ class _CitySelectorBottomSheetState extends State<CitySelectorBottomSheet> {
 
           const Divider(height: 16.0),
 
+          // All Pakistan (Nationwide) Option
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                side: BorderSide(
+                  color: currentLoc.isAllPakistan ? AppColors.primaryLight : AppColors.borderLight,
+                ),
+              ),
+              tileColor: currentLoc.isAllPakistan
+                  ? AppColors.primaryLight.withValues(alpha: 0.05)
+                  : null,
+              leading: Icon(
+                Icons.public,
+                color: currentLoc.isAllPakistan ? AppColors.primaryLight : AppColors.mutedForegroundLight,
+                size: 22.0,
+              ),
+              title: Text(
+                'All Pakistan (Nationwide)',
+                style: TextStyle(
+                  fontWeight: currentLoc.isAllPakistan ? FontWeight.w700 : FontWeight.w500,
+                  color: currentLoc.isAllPakistan ? AppColors.primaryLight : AppColors.foregroundLight,
+                ),
+              ),
+              subtitle: const Text(
+                'View all listings across the entire country',
+                style: TextStyle(fontSize: 12.0, color: AppColors.mutedForegroundLight),
+              ),
+              trailing: currentLoc.isAllPakistan
+                  ? const Icon(Icons.check_circle, color: AppColors.primaryLight)
+                  : null,
+              onTap: () async {
+                HapticFeedback.lightImpact();
+                await locationProvider.selectAllPakistan();
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ),
+
+          const SizedBox(height: 6.0),
+
           // Popular Cities Title
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 6.0),
@@ -209,6 +256,7 @@ class _CitySelectorBottomSheetState extends State<CitySelectorBottomSheet> {
                       ? const Icon(Icons.check, color: AppColors.primaryLight)
                       : null,
                   onTap: () async {
+                    HapticFeedback.lightImpact();
                     await locationProvider.selectCity(city);
                     if (context.mounted) {
                       Navigator.of(context).pop();

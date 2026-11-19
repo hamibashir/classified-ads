@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../core/constants/api_constants.dart';
 
@@ -75,6 +76,7 @@ class AdModel {
   final bool isFeatured;
   final double? distance;
   final List<String> images;
+  final Map<String, String> customFields;
   final AdSeller? seller;
   final AdCategoryRef? category;
   final DateTime createdAt;
@@ -103,6 +105,7 @@ class AdModel {
     this.isFeatured = false,
     this.distance,
     this.images = const [],
+    this.customFields = const {},
     this.seller,
     this.category,
     required this.createdAt,
@@ -144,9 +147,16 @@ class AdModel {
     }
   }
 
+  /// Returns user-facing description stripped of any machine specifications block
+  String get cleanDescription {
+    final specRegex = RegExp(r'===SPECIFICATIONS===[\s\S]*?====================', multiLine: true);
+    return description.replaceAll(specRegex, '').trim();
+  }
+
   AdModel copyWith({
     bool? isFavorite,
     String? status,
+    Map<String, String>? customFields,
   }) {
     return AdModel(
       id: id,
@@ -171,6 +181,7 @@ class AdModel {
       isFeatured: isFeatured,
       distance: distance,
       images: images,
+      customFields: customFields ?? this.customFields,
       seller: seller,
       category: category,
       createdAt: createdAt,
@@ -218,13 +229,38 @@ class AdModel {
       parsedDistance = double.tryParse(rawDistance);
     }
 
+    final parsedCustomFields = <String, String>{};
+    if (json['customFields'] is Map) {
+      (json['customFields'] as Map).forEach((k, v) {
+        if (v != null) parsedCustomFields[k.toString()] = v.toString();
+      });
+    }
+
+    final rawDesc = json['description']?.toString() ?? '';
+    final specMatch = RegExp(r'===SPECIFICATIONS===([\s\S]*?)====================').firstMatch(rawDesc);
+    if (specMatch != null) {
+      final jsonBlock = specMatch.group(1)?.trim();
+      if (jsonBlock != null && jsonBlock.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(jsonBlock);
+          if (decoded is Map) {
+            decoded.forEach((k, v) {
+              if (v != null && !parsedCustomFields.containsKey(k.toString())) {
+                parsedCustomFields[k.toString()] = v.toString();
+              }
+            });
+          }
+        } catch (_) {}
+      }
+    }
+
     return AdModel(
       id: json['id']?.toString() ?? '',
       userId: json['userId']?.toString() ?? '',
       categoryId: json['categoryId']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       slug: json['slug']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
+      description: rawDesc,
       price: parsedPrice,
       currency: json['currency']?.toString() ?? 'PKR',
       isNegotiable: json['isNegotiable'] == true,
@@ -241,6 +277,7 @@ class AdModel {
       isFeatured: json['isFeatured'] == true,
       distance: parsedDistance,
       images: imageList,
+      customFields: parsedCustomFields,
       seller: json['user'] is Map<String, dynamic>
           ? AdSeller.fromJson(json['user'] as Map<String, dynamic>)
           : null,

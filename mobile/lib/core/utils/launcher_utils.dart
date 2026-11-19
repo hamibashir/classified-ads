@@ -40,4 +40,9 @@ class LauncherUtils {
     final uri = Uri.parse('tel:$cleaned');
     return launchUrl(uri);
   }
+
+  static Future<bool> launchBrowserUrl(String url) async {
+    final uri = Uri.parse(url);
+    return launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 }

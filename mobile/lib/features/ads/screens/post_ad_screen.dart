@@ -1,13 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/category_fields.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/providers/ads_provider.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/location_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../models/category_model.dart';
 import '../../../models/user_location.dart';
 import '../../auth/screens/login_screen.dart';
 import '../widgets/image_picker_grid.dart';
@@ -37,6 +40,7 @@ class _PostAdScreenState extends State<PostAdScreen> {
   double? _longitude = 74.3587;
   bool _showPhone = true;
   bool _allowWhatsapp = true;
+  final Map<String, String> _customFieldsMap = {};
 
   List<File> _selectedImages = [];
   bool _isSubmitting = false;
@@ -49,7 +53,11 @@ class _PostAdScreenState extends State<PostAdScreen> {
       if (!mounted) return;
       final loc = context.read<LocationProvider>().currentLocation;
       setState(() {
-        _selectedCity = loc.cityName;
+        if (!loc.isAllPakistan && CityInfo.pakistaniCities.any((c) => c.name == loc.cityName)) {
+          _selectedCity = loc.cityName;
+        } else {
+          _selectedCity = 'Lahore';
+        }
         _latitude = loc.latitude;
         _longitude = loc.longitude;
       });
@@ -139,9 +147,14 @@ class _PostAdScreenState extends State<PostAdScreen> {
       orElse: () => CityInfo.pakistaniCities[1], // default Lahore
     );
 
+    String formattedDescription = _descriptionController.text.trim();
+    if (_customFieldsMap.isNotEmpty) {
+      formattedDescription += '\n\n===SPECIFICATIONS===\n${jsonEncode(_customFieldsMap)}\n====================\n';
+    }
+
     final payload = {
       'title': _titleController.text.trim(),
-      'description': _descriptionController.text.trim(),
+      'description': formattedDescription,
       'price': price,
       'currency': 'PKR',
       'isNegotiable': _isNegotiable,
@@ -154,6 +167,7 @@ class _PostAdScreenState extends State<PostAdScreen> {
       'showPhone': _showPhone,
       'allowWhatsapp': _allowWhatsapp,
       'images': uploadedImageUrls,
+      'customFields': _customFieldsMap,
     };
 
     final response = await _apiClient.post<dynamic>(
@@ -218,6 +232,7 @@ class _PostAdScreenState extends State<PostAdScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final adsProvider = context.watch<AdsProvider>();
 
     return Scaffold(
@@ -236,7 +251,9 @@ class _PostAdScreenState extends State<PostAdScreen> {
               const Text('Category', style: AppTextStyles.bodyMedium),
               const SizedBox(height: 6.0),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCategoryId,
+                initialValue: adsProvider.categories.any((c) => c.id == _selectedCategoryId)
+                    ? _selectedCategoryId
+                    : null,
                 hint: const Text('Select a category'),
                 decoration: const InputDecoration(),
                 items: adsProvider.categories.map((cat) {
@@ -248,6 +265,7 @@ class _PostAdScreenState extends State<PostAdScreen> {
                 onChanged: (val) {
                   setState(() {
                     _selectedCategoryId = val;
+                    _customFieldsMap.clear();
                   });
                 },
                 validator: (val) {
@@ -255,6 +273,7 @@ class _PostAdScreenState extends State<PostAdScreen> {
                   return null;
                 },
               ),
+              _buildCustomFieldsSection(adsProvider, isDark),
               const SizedBox(height: 18.0),
 
               // 2. Ad Title
@@ -396,7 +415,9 @@ class _PostAdScreenState extends State<PostAdScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      initialValue: _selectedCity,
+                      initialValue: CityInfo.pakistaniCities.any((c) => c.name == _selectedCity)
+                          ? _selectedCity
+                          : 'Lahore',
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.location_city, size: 20.0),
                       ),
@@ -478,6 +499,112 @@ class _PostAdScreenState extends State<PostAdScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCustomFieldsSection(AdsProvider adsProvider, bool isDark) {
+    if (_selectedCategoryId == null) return const SizedBox.shrink();
+
+    CategoryModel? selectedCat;
+    try {
+      selectedCat = adsProvider.categories.firstWhere((c) => c.id == _selectedCategoryId);
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
+
+    final fields = CategoryFieldsRegistry.getFieldsForCategory(selectedCat.slug);
+    if (fields.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 16.0),
+        Row(
+          children: [
+            Icon(Icons.tune, size: 18.0, color: isDark ? AppColors.primaryDark : AppColors.primaryLight),
+            const SizedBox(width: 6.0),
+            Text(
+              '${selectedCat.name} Specifications',
+              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10.0),
+        Container(
+          padding: const EdgeInsets.all(14.0),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.cardDark : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: fields.map((field) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      field.label,
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.foregroundDark : AppColors.foregroundLight,
+                      ),
+                    ),
+                    const SizedBox(height: 6.0),
+                    if (field.type == CategoryFieldType.select)
+                      DropdownButtonFormField<String>(
+                        initialValue: _customFieldsMap[field.key],
+                        hint: Text('Select ${field.label}', style: AppTextStyles.caption),
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(field.icon, size: 18.0),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                        ),
+                        items: field.options.map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt,
+                            child: Text(opt, style: AppTextStyles.body),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            if (val != null) {
+                              _customFieldsMap[field.key] = val;
+                            } else {
+                              _customFieldsMap.remove(field.key);
+                            }
+                          });
+                        },
+                      )
+                    else
+                      TextFormField(
+                        initialValue: _customFieldsMap[field.key],
+                        decoration: InputDecoration(
+                          hintText: field.placeholder ?? 'Enter ${field.label.toLowerCase()}',
+                          prefixIcon: Icon(field.icon, size: 18.0),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                        ),
+                        keyboardType: field.type == CategoryFieldType.number
+                            ? TextInputType.number
+                            : TextInputType.text,
+                        onChanged: (val) {
+                          if (val.trim().isNotEmpty) {
+                            _customFieldsMap[field.key] = val.trim();
+                          } else {
+                            _customFieldsMap.remove(field.key);
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }

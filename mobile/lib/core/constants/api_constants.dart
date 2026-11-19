@@ -32,6 +32,6 @@ class ApiConstants {
   static String conversationMessages(String id) => '/chat/conversations/$id/messages';
 
   // User endpoints
-  static const String myAds = '/ads/my';
+  static const String myAds = '/ads/my-ads';
   static const String favorites = '/ads/favorites';
 }

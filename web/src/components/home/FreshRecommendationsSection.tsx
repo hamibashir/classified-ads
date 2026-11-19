@@ -254,7 +254,7 @@ export const FreshRecommendationsSection: React.FC = () => {
   const [scope, setScope] = useState<'city' | 'nationwide'>('city');
   const [ads, setAds] = useState<AdListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [displayCount, setDisplayCount] = useState<number>(8);
+  const [displayCount, setDisplayCount] = useState<number>(12);
 
   const fetchFreshAds = useCallback(async (retryCount = 0) => {
     setLoading(true);
@@ -376,9 +376,16 @@ export const FreshRecommendationsSection: React.FC = () => {
             Marketplace Feed
           </span>
 
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-            Fresh Recommendations
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+              Fresh Recommendations
+            </h2>
+            {ads.length > 0 && (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700">
+                {ads.length} ads
+              </span>
+            )}
+          </div>
 
           <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
             {scope === 'city'
